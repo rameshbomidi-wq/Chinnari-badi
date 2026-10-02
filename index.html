@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>చిన్నారి బడి – రాయ్ ఎడ్యుకేషన్</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Tammudu+2:wght@500;700;800&family=Noto+Sans+Devanagari:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14213D;--panel:#1F3160;--panel2:#2A4180;--ink:#FFF8E7;--dim:#AFC0E8;
+  --focus:#FFC93C;--learn:#3DDC97;--do:#FF8C42;--quiz:#5BC0EB;--bad:#FF5A6E;--paper:#FFFDF6;--dark:#14213D;--think:#F15BB5;
+  font-family:'Baloo Tammudu 2','Noto Sans Telugu','Noto Sans Devanagari',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-size:clamp(16px,1.45vw,30px);min-height:100vh;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+kbd{font:inherit;background:var(--panel2);color:var(--ink);border-radius:.35em;padding:0 .45em;margin:0 .15em}
+.top{display:flex;align-items:center;gap:.8em;padding:.45em 1.2em;padding-top:calc(.45em + env(safe-area-inset-top,0px));background:#0E1830;position:sticky;top:0;z-index:5}
+.top h1{flex:1;font-size:1.45em;font-weight:800;line-height:1.1}
+.top h1 small{display:block;font-size:.5em;font-weight:500;color:var(--dim)}
+.hbtn{font-size:1.3em;width:2.1em;height:2.1em;border-radius:50%;background:var(--panel)}
+.hbtn.off{opacity:.45}
+.f:focus{outline:.28em solid var(--focus);outline-offset:.18em;transform:scale(1.05);position:relative;z-index:2}
+main{flex:1;display:flex;flex-direction:column;min-height:0}
+#hint{text-align:center;color:var(--dim);font-size:.85em;padding:.3em .6em;line-height:1.8}
+footer{text-align:center;padding:.3em;font-weight:800;color:var(--focus);font-size:1.05em}
+#toast{position:fixed;left:50%;bottom:3.5em;transform:translateX(-50%);background:#0E1830;border:2px solid var(--focus);border-radius:.8em;padding:.6em 1em;max-width:90vw;text-align:center;display:none;z-index:9}
+@keyframes pop{from{transform:scale(.85);opacity:.3}to{transform:none;opacity:1}}
+@keyframes shake{25%{transform:translateX(-.4em)}75%{transform:translateX(.4em)}}
+@keyframes pulse{50%{transform:scale(1.35)}}
+@keyframes dash{to{stroke-dashoffset:-34}}
+@keyframes ink{80%{stroke-dashoffset:0;fill:transparent}100%{stroke-dashoffset:0;fill:rgba(230,57,70,.22)}}
+
+/* home */
+.home{width:100%;max-width:1760px;margin:0 auto;padding:.6em 1.2em 1.5em}
+.hero{display:flex;align-items:center;gap:1em;padding:.4em 0 .2em}
+.hero .glyphs{font-size:3em;font-weight:800;line-height:1;letter-spacing:.05em}
+.hero .glyphs span:nth-child(1){color:var(--learn)}.hero .glyphs span:nth-child(2){color:var(--do)}.hero .glyphs span:nth-child(3){color:var(--quiz)}.hero .glyphs span:nth-child(4){color:var(--focus)}
+.hero p{color:var(--dim);line-height:1.4}
+.sec h2{font-size:1.2em;margin:.9em 0 .45em;display:flex;align-items:center;gap:.45em}
+.sec h2 i{width:.7em;height:.7em;border-radius:50%;background:var(--c)}
+.sec h2 em{font-style:normal;color:var(--dim);font-size:.7em;font-weight:500}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.6em,1fr));gap:.75em}
+.tile{background:var(--panel);border-radius:.9em;padding:.7em .5em .6em;display:flex;flex-direction:column;align-items:center;text-align:center;border-bottom:.3em solid var(--c);transition:transform .12s}
+.tile .ic{font-size:2.3em;line-height:1.25}
+.tile .tn{font-weight:700;line-height:1.25;margin-top:.15em}
+.tile .en{font-size:.7em;color:var(--dim)}
+
+/* shared view */
+.view{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7em;padding:.8em;width:100%}
+.bar{display:flex;gap:.6em;flex-wrap:wrap;justify-content:center}
+.cb{background:var(--panel2);border-radius:.8em;padding:.25em 1em;font-size:1.2em;font-weight:700}
+.cb.on{background:var(--learn);color:#0C2A1C}
+.count{color:var(--dim);font-weight:700}
+.status{font-size:1.3em;font-weight:800;text-align:center;min-height:1.5em}
+
+/* flash */
+.fcard{width:min(94vw,1150px);flex:1;max-height:64vh;min-height:14em;background:var(--panel);border-radius:1.4em;display:flex;align-items:center;justify-content:center;gap:1.4em 2.5em;padding:1em 1.5em;flex-wrap:wrap;text-align:center}
+.fcard.pop{animation:pop .35s ease}
+.fbig{font-size:min(30vh,24vw);line-height:1.05;font-weight:800;color:var(--focus)}
+.fbig.lat{font-family:system-ui,sans-serif;letter-spacing:.02em}
+.fbig.dev,.dev{font-family:'Noto Sans Devanagari',sans-serif}
+.fbig.em{font-size:min(26vh,22vw)}
+.fbig .shp{width:min(34vh,30vw);height:min(34vh,30vw);display:block}
+.fsw{width:min(30vh,26vw);height:min(30vh,26vw);border-radius:50%;border:.2em solid #fff5}
+.ftx{display:flex;flex-direction:column;gap:.2em;max-width:34em}
+.l1{font-size:2.1em;font-weight:800;line-height:1.25}
+.l1.long{font-size:1.6em}
+.l2{font-size:1.35em;color:var(--dim);line-height:1.3}
+.l3{font-size:1.1em;line-height:1.35}
+
+/* paper boards */
+.board{position:relative;background:var(--paper);border-radius:1em;overflow:hidden;box-shadow:0 .4em 0 #0B1428}
+.board canvas,.board svg{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.b21{width:min(94vw,calc(58vh*2));aspect-ratio:2/1}
+.b43{width:min(92vw,calc(58vh*4/3));aspect-ratio:4/3}
+.b53{width:min(94vw,calc(58vh*5/3));aspect-ratio:5/3}
+.pencil{position:absolute;font-size:2em;transform:translate(-15%,-85%);pointer-events:none;display:none}
+.wguide{fill:none;stroke:#9AA7C7;stroke-width:3;stroke-dasharray:3 9;stroke-linecap:round}
+.wink{fill:transparent;stroke:#E63946;stroke-width:5;stroke-dasharray:1600;stroke-dashoffset:1600;stroke-linejoin:round}
+.wink.go{animation:ink 3.2s ease forwards}
+.nextdot{animation:pulse 1s infinite;transform-box:fill-box;transform-origin:center}
+.rg{cursor:pointer}
+.rg.sel{stroke:#FF8C42;stroke-width:7;stroke-dasharray:10 7;animation:dash 1s linear infinite}
+.pal{display:flex;gap:.55em;flex-wrap:wrap;justify-content:center;align-items:center}
+.pal i{width:2.1em;height:2.1em;border-radius:50%;border:3px solid #ffffff55;cursor:pointer}
+.pal i.on{outline:.25em solid var(--focus);outline-offset:.18em;transform:scale(1.15)}
+.pal .cb.on{background:var(--focus);color:var(--dark)}
+.dpad{display:grid;grid-template-columns:repeat(3,2.6em);gap:.3em}
+.dpad button{background:var(--panel2);border-radius:.6em;height:2.2em;font-size:1.1em}
+
+/* quiz */
+.quiz{width:min(94vw,1200px);flex:1;display:flex;flex-direction:column;gap:.75em;padding:.6em 0}
+.qtop{display:flex;align-items:center;gap:.8em}
+.qq{flex:1;font-size:1.55em;font-weight:800;line-height:1.3}
+.qsc{background:var(--panel);border-radius:2em;padding:.15em .9em;font-weight:700;white-space:nowrap}
+.qvis{background:var(--panel);border-radius:1.2em;min-height:26vh;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.25em .4em;padding:.8em;font-size:2.5em;text-align:center;line-height:1.2}
+.qvis.pop{animation:pop .35s ease}
+.qbig{font-size:2.2em}
+.qword{font-size:1.4em;font-weight:800;color:var(--focus)}
+.qtext{font-size:.55em;font-weight:700;line-height:1.5;max-width:30em}
+.qvis .op{color:var(--focus);font-weight:800;margin:0 .2em}
+.gone{position:relative;opacity:.4}
+.gone::after{content:'✕';position:absolute;inset:0;color:var(--bad);font-weight:800;display:flex;align-items:center;justify-content:center}
+.seq{display:flex;gap:.3em;flex-wrap:wrap;justify-content:center}
+.seq span{min-width:1.5em;padding:0 .3em;background:var(--panel2);border-radius:.3em}
+.seq span.q{background:var(--focus);color:var(--dark)}
+.lat{font-family:system-ui,sans-serif}
+.clock{width:min(38vh,60vw);height:min(38vh,60vw)}
+.clock text{font-size:17px;font-weight:700;fill:#14213D;text-anchor:middle;dominant-baseline:central;font-family:system-ui,sans-serif}
+.qops{display:grid;grid-template-columns:1fr 1fr;gap:.75em}
+.opt{background:var(--panel2);border-radius:1em;padding:.35em .5em;font-size:1.65em;font-weight:800;min-height:2.4em;border:3px solid transparent;line-height:1.2}
+.opt small{display:block;font-size:.55em;font-weight:500;color:var(--dim)}
+.opt .oe{font-size:1.5em}
+.opt.ok{background:var(--learn);color:#0C2A1C}.opt.ok small{color:#0C2A1C}
+.opt.no{background:var(--bad);animation:shake .4s}
+.opt.txt{font-size:1.12em;font-weight:700;text-align:left;padding:.5em .8em}
+.opt.nextq{background:var(--focus);color:var(--dark);text-align:center}
+.qhead{font-size:1.4em;line-height:1}
+.why{width:100%;font-size:.46em;font-weight:700;color:var(--learn);margin-top:.3em;line-height:1.5}
+
+@media (max-width:700px){.opt.txt{font-size:.95em}.fcard{flex-direction:column;gap:.6em}.fbig{font-size:34vw}.qvis{font-size:1.9em}.opt{font-size:1.35em}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <button class="f hbtn" id="homeBtn" aria-label="హోమ్" style="display:none">🏠</button>
+  <h1 id="title">చిన్నారి బడి<small>నర్సరీ, LKG, UKG</small></h1>
+  <button class="f hbtn" id="voiceBtn" aria-label="వాయిస్">🔊</button>
+</header>
+<main id="stage"></main>
+<div id="hint"></div>
+<footer>రాయ్ ఎడ్యుకేషన్</footer>
+<div id="toast"></div>
+
+<script>
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const rnd=n=>Math.floor(Math.random()*n), pick=a=>a[rnd(a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const P=s=>s.trim().split(';').map(x=>x.trim().split('|'));
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',5000)}
+
+/* ---------- voice ---------- */
+const LANG={te:'te-IN',en:'en-IN',hi:'hi-IN'};
+let voiceOn=true;try{voiceOn=localStorage.getItem('cb_voice')!=='0'}catch(e){}
+let voices=[];const hasTTS='speechSynthesis' in window;
+function loadV(){voices=speechSynthesis.getVoices()}
+if(hasTTS){loadV();speechSynthesis.onvoiceschanged=loadV}
+function voiceFor(l){const c=LANG[l].toLowerCase();return voices.find(v=>v.lang.toLowerCase().replace('_','-')===c)||voices.find(v=>v.lang.toLowerCase().startsWith(l))}
+const warned={};
+function speak(parts){
+  if(!voiceOn||!hasTTS||!parts)return;
+  speechSynthesis.cancel();
+  setTimeout(()=>parts.forEach(([t,l='te'])=>{
+    if(!t)return;const u=new SpeechSynthesisUtterance(t);u.lang=LANG[l];
+    const v=voiceFor(l);if(v)u.voice=v;
+    else if(voices.length&&!warned[l]){warned[l]=1;toast(`ఈ పరికరంలో ${l==='te'?'తెలుగు':l==='hi'?'హిందీ':'ఇంగ్లీష్'} వాయిస్ లేదు. Settings → Text-to-speech లో ఆ భాష వాయిస్ ఇన్‌స్టాల్ చేయండి.`)}
+    u.rate=l==='en'?0.85:0.9;speechSynthesis.speak(u);
+  }),60);
+}
+let actx;function beep(ok){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.frequency.value=ok?660:200;o.type=ok?'triangle':'sawtooth';g.gain.setValueAtTime(.15,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+.35);o.start();o.stop(actx.currentTime+.35)}catch(e){}}
+const PRAISE=['భలే!','బాగుంది!','శభాష్!','చాలా బాగుంది!','సూపర్!'];
+
+/* ---------- numbers ---------- */
+const TEN=['సున్నా','ఒకటి','రెండు','మూడు','నాలుగు','ఐదు','ఆరు','ఏడు','ఎనిమిది','తొమ్మిది','పది','పదకొండు','పన్నెండు','పదమూడు','పద్నాలుగు','పదిహేను','పదహారు','పదిహేడు','పద్దెనిమిది','పందొమ్మిది','ఇరవై'];
+const HIN=['शून्य','एक','दो','तीन','चार','पाँच','छह','सात','आठ','नौ','दस','ग्यारह','बारह','तेरह','चौदह','पंद्रह','सोलह','सत्रह','अठारह','उन्नीस','बीस'];
+const ENN=['Zero','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen','Twenty'];
+const tDig=n=>String(n).replace(/\d/g,d=>'౦౧౨౩౪౫౬౭౮౯'[d]);
+const hDig=n=>String(n).replace(/\d/g,d=>'०१२३४५६७८९'[d]);
+const sayN=n=>n<=20?[TEN[n],'te']:[String(n),'en'];
+const HALF=['','ఒంటిగంటన్నర','రెండున్నర','మూడున్నర','నాలుగున్నర','ఐదున్నర','ఆరున్నర','ఏడున్నర','ఎనిమిదిన్నర','తొమ్మిదిన్నర','పదిన్నర','పదకొండున్నర','పన్నెండున్నర'];
+
+/* ---------- data ---------- */
+const VOW=P(`అ|అమ్మ|👩;ఆ|ఆవు|🐄;ఇ|ఇల్లు|🏠;ఈ|ఈగ|🪰;ఉ|ఉడుత|🐿️;ఊ|ఊయల|;ఋ|ఋషి|🧘;ౠ||;ఎ|ఎలుక|🐀;ఏ|ఏనుగు|🐘;ఐ|ఐదు|5️⃣;ఒ|ఒంటె|🐪;ఓ|ఓడ|🚢;ఔ|ఔషధం|💊;అం|అంగడి|🏪;అః||`);
+const CON=P(`క|కలం|🖊️;ఖ|ఖడ్గం|🗡️;గ|గంట|🔔;ఘ|ఘటం|🏺;ఙ||;చ|చిలుక|🦜;ఛ|ఛత్రి|☂️;జ|జింక|🦌;ఝ|ఝరి|🏞️;ఞ||;ట|టమాట|🍅;ఠ|మఠం|🛕;డ|డప్పు|🥁;ఢ|ఢంకా|🪘;ణ|బాణం|🏹;త|తాబేలు|🐢;థ|రథం|;ద|దీపం|🪔;ధ|ధాన్యం|🌾;న|నక్క|🦊;ప|పడవ|⛵;ఫ|ఫలం|🍎;బ|బంతి|⚽;భ|భవనం|🏢;మ|మామిడి|🥭;య|యంత్రం|⚙️;ర|రైలు|🚂;ల|లడ్డు|;వ|వంతెన|🌉;శ|శంఖం|🐚;ష|షట్కోణం|⬡;స|సింహం|🦁;హ|హంస|🦢;ళ|తాళం|🔒;క్ష|క్షీరం|🥛;ఱ|ఱంపం|🪚`);
+const ENG=P(`A|Apple|ఆపిల్|🍎;B|Ball|బంతి|⚽;C|Cat|పిల్లి|🐱;D|Dog|కుక్క|🐶;E|Elephant|ఏనుగు|🐘;F|Fish|చేప|🐟;G|Goat|మేక|🐐;H|Hat|టోపీ|🎩;I|Ice cream|ఐస్‌క్రీమ్|🍦;J|Jug|జగ్గు|🏺;K|Kite|గాలిపటం|🪁;L|Lion|సింహం|🦁;M|Mango|మామిడి|🥭;N|Nose|ముక్కు|👃;O|Owl|గుడ్లగూబ|🦉;P|Parrot|చిలుక|🦜;Q|Queen|రాణి|👸;R|Rabbit|కుందేలు|🐇;S|Sun|సూర్యుడు|☀️;T|Tiger|పులి|🐅;U|Umbrella|గొడుగు|☂️;V|Van|వ్యాన్|🚐;W|Watch|గడియారం|⌚;X|X-mas tree|క్రిస్మస్ చెట్టు|🎄;Y|Yo-yo|యో-యో|🪀;Z|Zebra|జీబ్రా|🦓`);
+const HV=P(`अ|अनार|;आ|आम|🥭;इ|इमली|;ई|ईख|🎋;उ|उल्लू|🦉;ऊ|ऊन|🧶;ऋ|ऋषि|🧘;ए|एक|1️⃣;ऐ|ऐनक|👓;ओ|ओखली|;औ|औरत|👩;अं|अंगूर|🍇;अः||`);
+const HC=P(`क|कबूतर|🕊️;ख|खरगोश|🐇;ग|गमला|🪴;घ|घड़ी|⌚;ङ||;च|चम्मच|🥄;छ|छतरी|☂️;ज|जहाज|🚢;झ|झंडा|🚩;ञ||;ट|टमाटर|🍅;ठ|ठठेरा|;ड|डमरू|🥁;ढ|ढोलक|🪘;ण|बाण|🏹;त|तरबूज|🍉;थ|थरमस|;द|दवात|;ध|धनुष|🏹;न|नल|🚰;प|पतंग|🪁;फ|फल|🍎;ब|बकरी|🐐;भ|भालू|🐻;म|मछली|🐟;य|यज्ञ|🔥;र|रथ|;ल|लट्टू|;व|वन|🌳;श|शेर|🦁;ष|षट्कोण|⬡;स|सेब|🍎;ह|हाथी|🐘;क्ष|क्षत्रिय|;त्र|त्रिशूल|🔱;ज्ञ|ज्ञानी|🧘`);
+const ANI=P(`🐘|ఏనుగు|Elephant;🦁|సింహం|Lion;🐅|పులి|Tiger;🐒|కోతి|Monkey;🐄|ఆవు|Cow;🐃|గేదె|Buffalo;🐐|మేక|Goat;🐕|కుక్క|Dog;🐈|పిల్లి|Cat;🐎|గుర్రం|Horse;🐇|కుందేలు|Rabbit;🐻|ఎలుగుబంటి|Bear;🦊|నక్క|Fox;🦒|జిరాఫీ|Giraffe;🐪|ఒంటె|Camel;🐁|ఎలుక|Mouse;🐖|పంది|Pig;🦌|జింక|Deer`);
+const BIRD=P(`🦜|చిలుక|Parrot;🦚|నెమలి|Peacock;🕊️|పావురం|Pigeon;🦉|గుడ్లగూబ|Owl;🦆|బాతు|Duck;🐔|కోడి|Hen;🦅|గ్రద్ద|Eagle;🦢|హంస|Swan;🐧|పెంగ్విన్|Penguin;🦩|ఫ్లెమింగో|Flamingo;🐦|పిచ్చుక|Sparrow`);
+const FRU=P(`🍎|ఆపిల్|Apple;🍌|అరటిపండు|Banana;🥭|మామిడిపండు|Mango;🍇|ద్రాక్ష|Grapes;🍊|నారింజ|Orange;🍉|పుచ్చకాయ|Watermelon;🍍|అనాస|Pineapple;🍓|స్ట్రాబెర్రీ|Strawberry;🍒|చెర్రీ|Cherry;🍐|బేరిపండు|Pear;🥥|కొబ్బరికాయ|Coconut;🍋|నిమ్మకాయ|Lemon;🥝|కివి|Kiwi`);
+const VEG=P(`🍅|టమాట|Tomato;🥕|క్యారెట్|Carrot;🥔|బంగాళదుంప|Potato;🧅|ఉల్లిపాయ|Onion;🍆|వంకాయ|Brinjal;🌶️|మిరపకాయ|Chilli;🥒|దోసకాయ|Cucumber;🥦|బ్రోకలీ|Broccoli;🌽|మొక్కజొన్న|Corn;🧄|వెల్లుల్లి|Garlic;🫑|క్యాప్సికమ్|Capsicum;🥬|ఆకుకూర|Leafy greens;🎃|గుమ్మడికాయ|Pumpkin`);
+const BODY=P(`😀|ముఖం|Face;👁️|కన్ను|Eye;👂|చెవి|Ear;👃|ముక్కు|Nose;👄|నోరు|Mouth;🦷|పన్ను|Tooth;👅|నాలుక|Tongue;💇|జుట్టు|Hair;💪|చేయి|Arm;✋|అరచేయి|Palm;👆|వేలు|Finger;🦵|కాలు|Leg;🦶|పాదం|Foot;❤️|గుండె|Heart;🧠|మెదడు|Brain`);
+const DAYS=P(`ఆదివారం|Sunday|SUN;సోమవారం|Monday|MON;మంగళవారం|Tuesday|TUE;బుధవారం|Wednesday|WED;గురువారం|Thursday|THU;శుక్రవారం|Friday|FRI;శనివారం|Saturday|SAT`);
+const MON=P(`జనవరి|January|JAN;ఫిబ్రవరి|February|FEB;మార్చి|March|MAR;ఏప్రిల్|April|APR;మే|May|MAY;జూన్|June|JUN;జూలై|July|JUL;ఆగస్టు|August|AUG;సెప్టెంబర్|September|SEP;అక్టోబర్|October|OCT;నవంబర్|November|NOV;డిసెంబర్|December|DEC`);
+const MASA='చైత్రం;వైశాఖం;జ్యేష్ఠం;ఆషాఢం;శ్రావణం;భాద్రపదం;ఆశ్వయుజం;కార్తీకం;మార్గశిరం;పుష్యం;మాఘం;ఫాల్గుణం'.split(';');
+const SEAS=P(`🌸|వసంత ఋతువు|Spring|చైత్రం, వైశాఖం;☀️|గ్రీష్మ ఋతువు|Summer|జ్యేష్ఠం, ఆషాఢం;🌧️|వర్ష ఋతువు|Rainy season|శ్రావణం, భాద్రపదం;🌕|శరదృతువు|Autumn|ఆశ్వయుజం, కార్తీకం;🌫️|హేమంత ఋతువు|Pre-winter|మార్గశిరం, పుష్యం;❄️|శిశిర ఋతువు|Winter|మాఘం, ఫాల్గుణం`);
+const HAB=P(`🪥|ఉదయాన్నే పళ్ళు తోముకోవాలి|Brush your teeth every morning;🛁|రోజూ స్నానం చేయాలి|Take a bath every day;🧼|భోజనానికి ముందు చేతులు కడుక్కోవాలి|Wash your hands before eating;🙏|పెద్దలను గౌరవించాలి|Respect elders;🥗|పండ్లు, కూరగాయలు తినాలి|Eat fruits and vegetables;💧|నీళ్ళు ఎక్కువగా తాగాలి|Drink plenty of water;😴|సమయానికి నిద్రపోవాలి|Sleep on time;🗑️|చెత్తను చెత్తబుట్టలో వేయాలి|Put waste in the dustbin;📚|రోజూ చదువుకోవాలి|Study every day;🤝|అందరితో కలిసి ఆడుకోవాలి|Play together with everyone;💅|గోళ్ళు కత్తిరించుకోవాలి|Keep your nails short;🚦|రోడ్డు జాగ్రత్తగా దాటాలి|Cross the road carefully`);
+const WORDS=P(`🐱|cat|పిల్లి;🐶|dog|కుక్క;🦇|bat|గబ్బిలం;🐀|rat|ఎలుక;🐔|hen|కోడి;🖊️|pen|పెన్ను;☕|cup|కప్పు;🚌|bus|బస్సు;☀️|sun|సూర్యుడు;🎒|bag|సంచి;📦|box|పెట్టె;🥚|egg|గుడ్డు;🐜|ant|చీమ;🐄|cow|ఆవు;🐷|pig|పంది;🦊|fox|నక్క;🛏️|bed|మంచం;🚗|car|కారు;🎩|hat|టోపీ;🗺️|map|పటం;🔑|key|తాళంచెవి;🦉|owl|గుడ్లగూబ`);
+const COLORS=P(`#E63946|ఎరుపు|Red;#3DDC97|ఆకుపచ్చ|Green;#3A86FF|నీలం|Blue;#FFD23F|పసుపు|Yellow;#FF8C42|నారింజ|Orange;#9B5DE5|ఊదా|Purple;#F15BB5|గులాబీ|Pink;#8D5524|గోధుమ|Brown;#222222|నలుపు|Black;#FFFFFF|తెలుపు|White;#9AA0A6|బూడిద|Grey;#5BC0EB|ఆకాశ నీలం|Sky blue`);
+
+/* shapes */
+const reg=(n,r,rot=-90)=>Array.from({length:n},(_,i)=>{const a=(rot+i*360/n)*Math.PI/180;return `${(50+r*Math.cos(a)).toFixed(1)},${(50+r*Math.sin(a)).toFixed(1)}`}).join(' ');
+const starPts=(cx,cy,R,r)=>Array.from({length:10},(_,i)=>{const a=(-90+i*36)*Math.PI/180,rr=i%2?r:R;return [cx+rr*Math.cos(a),cy+rr*Math.sin(a)]});
+const SHP={circle:'<circle cx="50" cy="50" r="42"/>',square:'<rect x="10" y="10" width="80" height="80"/>',triangle:'<polygon points="50,8 93,88 7,88"/>',rect:'<rect x="4" y="26" width="92" height="48"/>',
+  star:`<polygon points="${starPts(50,52,46,19).map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}"/>`,
+  heart:'<path d="M50 88 C10 60 4 35 24 20 C38 10 50 20 50 31 C50 20 62 10 76 20 C96 35 90 60 50 88Z"/>',oval:'<ellipse cx="50" cy="50" rx="45" ry="29"/>',
+  diamond:'<polygon points="50,4 88,50 50,96 12,50"/>',pentagon:`<polygon points="${reg(5,44)}"/>`,hexagon:`<polygon points="${reg(6,44)}"/>`,
+  crescent:'<path d="M60 6 A44 44 0 1 0 60 94 A36 36 0 1 1 60 6Z"/>'};
+const shp=(n,c)=>`<svg viewBox="0 0 100 100" class="shp"><g fill="${c}" stroke="#FFF8E7" stroke-width="3" stroke-linejoin="round">${SHP[n]}</g></svg>`;
+const SHAPES=P(`circle|వృత్తం|Circle|#E63946;square|చతురస్రం|Square|#3A86FF;triangle|త్రిభుజం|Triangle|#3DDC97;rect|దీర్ఘచతురస్రం|Rectangle|#FF8C42;star|నక్షత్రం|Star|#FFD23F;heart|హృదయం|Heart|#F15BB5;oval|అండాకారం|Oval|#9B5DE5;diamond|వజ్రాకారం|Diamond|#5BC0EB;pentagon|పంచభుజి|Pentagon|#FF5A6E;hexagon|షడ్భుజి|Hexagon|#3DDC97;crescent|అర్ధచంద్రాకారం|Crescent|#FFD23F`);
+
+/* ---------- flash item builders ---------- */
+const picItems=L=>L.map(([e,te,en])=>({big:e,cls:'em',l1:te,l2:en,say:[[te],[en,'en']]}));
+const ITEMS={
+  tel:()=>[...VOW.map(x=>[...x,'అచ్చు']),...CON.map(x=>[...x,'హల్లు'])].map(([l,w,e,g])=>({big:l,l1:w?`${e||''} ${w}`:'',l3:g,say:w?[[l],[w]]:[[l]]})),
+  eng:()=>ENG.map(([U,w,te,e])=>({big:U+U.toLowerCase(),cls:'lat',l1:`${e} ${w}`,l2:te,say:[[`${U}. ${U} for ${w}`,'en'],[te]]})),
+  hin:()=>[...HV,...HC].map(([l,w,e])=>({big:l,cls:'dev',l1:w?`${e||''} <span class="dev">${w}</span>`:'',say:[[w?`${l}, ${l} से ${w}`:l,'hi']]})),
+  num:()=>Array.from({length:20},(_,i)=>{const n=i+1;return{big:n,cls:'lat',l1:`${tDig(n)} ${TEN[n]}`,l2:`<span class="dev">${hDig(n)} ${HIN[n]}</span>`,l3:`${n} ${ENN[n]}`,say:[[TEN[n]],[HIN[n],'hi'],[ENN[n],'en']]}}),
+  shapes:()=>SHAPES.map(([k,te,en,c])=>({svg:shp(k,c),l1:te,l2:en,say:[[te],[en,'en']]})),
+  colors:()=>COLORS.map(([c,te,en])=>({sw:c,l1:te,l2:en,say:[[te],[en,'en']]})),
+  animals:()=>picItems(ANI),birds:()=>picItems(BIRD),fruits:()=>picItems(FRU),veg:()=>picItems(VEG),body:()=>picItems(BODY),
+  days:()=>DAYS.map(([te,en,ab],i)=>({big:ab,cls:'lat',l1:te,l2:en,l3:`వారంలో ${i+1}వ రోజు`,say:[[te],[en,'en']]})),
+  months:()=>[...MON.map(([te,en,ab],i)=>({big:ab,cls:'lat',l1:te,l2:en,l3:`సంవత్సరంలో ${i+1}వ నెల`,say:[[te],[en,'en']]})),
+              ...MASA.map((m,i)=>({big:tDig(i+1),l1:m,l2:'తెలుగు మాసం',l3:`${i+1}వ తెలుగు నెల`,say:[[m]]}))],
+  seasons:()=>SEAS.map(([e,te,en,m])=>({big:e,cls:'em',l1:te,l2:en,l3:`నెలలు: ${m}`,say:[[te],[en,'en'],[m]]})),
+  habits:()=>HAB.map(([e,te,en])=>({big:e,cls:'em',l1:te,long:1,l2:en,say:[[te],[en,'en']]})),
+  words:()=>WORDS.map(([e,w,te])=>({big:e,cls:'em',l1:`<span class="lat">${w.toUpperCase().split('').join(' ')}</span>`,l2:`${w} – ${te}`,say:[[`${w.toUpperCase().split('').join(', ')}. ${w}`,'en'],[te]]}))
+};
+
+/* ---------- navigation ---------- */
+let view=null,navKey=false;
+function keyOf(e){const k=e.key,c=e.keyCode;
+  if(k==='ArrowLeft'||c===37)return'left';if(k==='ArrowRight'||c===39)return'right';
+  if(k==='ArrowUp'||c===38)return'up';if(k==='ArrowDown'||c===40)return'down';
+  if(k==='Enter'||c===13||c===23)return'ok';
+  if(['Escape','Backspace','GoBack','BrowserBack'].includes(k)||[27,8,10009,461,166].includes(c))return'back';
+  if(k==='MediaPlayPause'||k===' '||[179,415,10252,19,32].includes(c))return'play';return null}
+function focusables(){return[...document.querySelectorAll('.f')].filter(e=>e.getClientRects().length&&!e.disabled)}
+function spatial(dir){
+  const els=focusables(),cur=document.activeElement;
+  if(!els.includes(cur)){if(els.length){navKey=true;(els.find(e=>e.closest('#stage'))||els[0]).focus()}return}
+  const r=cur.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let best=null,bs=1e9;
+  for(const e of els){if(e===cur)continue;const q=e.getBoundingClientRect(),dx=q.left+q.width/2-cx,dy=q.top+q.height/2-cy;
+    let main,cross;if(dir==='right'){main=dx;cross=Math.abs(dy)}else if(dir==='left'){main=-dx;cross=Math.abs(dy)}else if(dir==='down'){main=dy;cross=Math.abs(dx)}else{main=-dy;cross=Math.abs(dx)}
+    if(main<=4)continue;const s=main+cross*2.3;if(s<bs){bs=s;best=e}}
+  if(best){navKey=true;best.focus();best.scrollIntoView({block:'nearest',inline:'nearest'})}
+}
+document.addEventListener('focusin',e=>{const t=e.target;if(navKey&&t.dataset&&t.dataset.say){try{speak(JSON.parse(t.dataset.say))}catch(x){}}navKey=false});
+document.addEventListener('keydown',e=>{
+  const k=keyOf(e);if(!k)return;
+  if(k==='back'){if(view&&view.id){e.preventDefault();goHome()}return}
+  if(view&&view.key&&view.key(k)){e.preventDefault();return}
+  if(['left','right','up','down'].includes(k)){e.preventDefault();spatial(k)}
+  else if(k==='ok'&&!document.activeElement.classList.contains('f')){e.preventDefault();spatial('down')}
+});
+function hint(h){$('#hint').innerHTML=h}
+function setVoiceBtn(){const b=$('#voiceBtn');b.textContent=voiceOn?'🔊':'🔇';b.classList.toggle('off',!voiceOn)}
+$('#voiceBtn').onclick=()=>{voiceOn=!voiceOn;try{localStorage.setItem('cb_voice',voiceOn?'1':'0')}catch(e){}setVoiceBtn();if(!voiceOn&&hasTTS)speechSynthesis.cancel();else speak([['వాయిస్ ఆన్']])};
+$('#homeBtn').onclick=()=>goHome();
+setVoiceBtn();
+
+/* ---------- views ---------- */
+function Flash(items){return st=>{
+  let i=0,auto=null;const n=items.length;
+  st.innerHTML=`<div class="view"><div class="fcard" id="fc"></div><div class="bar"><button class="cb" tabindex="-1" data-a="prev">◀</button><button class="cb" tabindex="-1" data-a="say">🔊 విను</button><button class="cb" tabindex="-1" data-a="auto">▶ ఆటో</button><button class="cb" tabindex="-1" data-a="next">▶</button></div><div class="count" id="fn"></div></div>`;
+  const fc=$('#fc');
+  function show(sp=true){const it=items[i];
+    const big=it.svg?`<div class="fbig">${it.svg}</div>`:it.sw?`<div class="fsw" style="background:${it.sw}"></div>`:`<div class="fbig ${it.cls||''}">${it.big}</div>`;
+    fc.innerHTML=big+`<div class="ftx">${it.l1?`<div class="l1${it.long?' long':''}">${it.l1}</div>`:''}${it.l2?`<div class="l2">${it.l2}</div>`:''}${it.l3?`<div class="l3">${it.l3}</div>`:''}</div>`;
+    fc.classList.remove('pop');void fc.offsetWidth;fc.classList.add('pop');$('#fn').textContent=`${i+1} / ${n}`;if(sp)speak(it.say)}
+  const go=d=>{i=(i+d+n)%n;show()};
+  function toggle(){const b=st.querySelector('[data-a=auto]');if(auto){clearInterval(auto);auto=null;b.classList.remove('on');b.textContent='▶ ఆటో'}else{auto=setInterval(()=>go(1),5500);b.classList.add('on');b.textContent='⏸ ఆపు';go(1)}}
+  st.querySelector('.bar').onclick=e=>{const a=e.target.closest('button')?.dataset.a;if(a==='prev')go(-1);if(a==='next')go(1);if(a==='say')speak(items[i].say);if(a==='auto')toggle()};
+  fc.onclick=()=>speak(items[i].say);
+  show();
+  hint('<kbd>◀ ▶</kbd> మార్చు <kbd>OK</kbd> వినిపించు <kbd>▲</kbd> ఆటో ప్లే <kbd>Back</kbd> హోమ్');
+  return{key:k=>{if(k==='left')go(-1);else if(k==='right')go(1);else if(k==='ok'||k==='down')speak(items[i].say);else if(k==='up'||k==='play')toggle();else return false;return true},destroy:()=>clearInterval(auto)};
+}}
+
+function attachDraw(cv,color,w){const c=cv.getContext('2d');let on=false;
+  const pt=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height]};
+  cv.onpointerdown=e=>{on=true;cv.setPointerCapture(e.pointerId);const[x,y]=pt(e);c.beginPath();c.moveTo(x,y);c.lineTo(x+.1,y);c.strokeStyle=color;c.lineWidth=w;c.lineCap=c.lineJoin='round';c.stroke()};
+  cv.onpointermove=e=>{if(!on)return;const[x,y]=pt(e);c.lineTo(x,y);c.stroke()};
+  cv.onpointerup=cv.onpointercancel=()=>on=false;
+  return()=>c.clearRect(0,0,cv.width,cv.height)}
+
+function Write(list){return st=>{
+  let i=0;const n=list.length;
+  st.innerHTML=`<div class="view"><div class="board b43"><svg viewBox="0 0 400 300" id="ws"></svg><canvas width="800" height="600" id="wc"></canvas></div>
+  <div class="bar"><button class="cb" tabindex="-1" data-a="prev">◀</button><button class="cb" tabindex="-1" data-a="write">✍️ రాసి చూపు</button><button class="cb" tabindex="-1" data-a="clear">🧽 తుడుపు</button><button class="cb" tabindex="-1" data-a="next">▶</button></div><div class="count" id="wn"></div></div>`;
+  const clear=attachDraw($('#wc'),'#3A86FF',16);
+  function draw(anim){const [ch]=list[i];const len=Array.from(ch).length;const fs=len>2?150:len>1?175:215;
+    const cls=/[a-z0-9]/i.test(ch)?'font-family="system-ui,sans-serif"':'';
+    $('#ws').innerHTML=`<line x1="20" y1="45" x2="380" y2="45" stroke="#D5DCEE" stroke-width="2"/><line x1="20" y1="255" x2="380" y2="255" stroke="#D5DCEE" stroke-width="2"/><line x1="20" y1="150" x2="380" y2="150" stroke="#EEF1F8" stroke-width="2" stroke-dasharray="6 6"/>
+    <text x="200" y="152" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="700" ${cls} class="wguide">${ch}</text>
+    <text x="200" y="152" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="700" ${cls} class="wink${anim?' go':''}">${ch}</text>`;
+    $('#wn').textContent=`${i+1} / ${n}`}
+  const go=d=>{i=(i+d+n)%n;clear();draw(false);speak(list[i][1])};
+  const write=()=>{draw(true);speak(list[i][1])};
+  st.querySelector('.bar').onclick=e=>{const a=e.target.closest('button')?.dataset.a;if(a==='prev')go(-1);if(a==='next')go(1);if(a==='write')write();if(a==='clear')clear()};
+  draw(false);speak(list[i][1]);
+  hint('<kbd>◀ ▶</kbd> మార్చు <kbd>OK</kbd> రాసి చూపు <kbd>▼</kbd> తుడుపు <kbd>Back</kbd> హోమ్ &nbsp; వేలితో బోర్డుపై దిద్దవచ్చు');
+  return{key:k=>{if(k==='left')go(-1);else if(k==='right')go(1);else if(k==='ok'||k==='up')write();else if(k==='down')clear();else return false;return true}};
+}}
+
+/* tracing patterns */
+function dens(p,s=5){const o=[p[0]];for(let i=1;i<p.length;i++){const a=p[i-1],b=p[i],n=Math.max(1,Math.round(Math.hypot(b[0]-a[0],b[1]-a[1])/s));for(let k=1;k<=n;k++)o.push([a[0]+(b[0]-a[0])*k/n,a[1]+(b[1]-a[1])*k/n])}return o}
+function fp(f,t0,t1,n){const o=[];for(let i=0;i<=n;i++)o.push(f(t0+(t1-t0)*i/n));return o}
+const PATTERNS=[
+  ['నిలువు గీతలు','Standing lines',()=>{const L=[];for(let x=100;x<=700;x+=75)L.push(dens([[x,60],[x,340]]));return L}],
+  ['అడ్డ గీతలు','Sleeping lines',()=>[80,160,240,320].map(y=>dens([[60,y],[740,y]]))],
+  ['ఏటవాలు గీతలు','Slanting lines',()=>{const L=[];for(let x=60;x<=640;x+=72)L.push(dens([[x,340],[x+100,60]]));return L}],
+  ['జిగ్‌జాగ్ గీతలు','Zigzag lines',()=>[120,280].map(cy=>{const p=[];for(let i=0;i<=17;i++)p.push([60+i*40,cy+(i%2?-50:50)]);return dens(p)})],
+  ['అలల గీతలు','Wave lines',()=>[120,280].map(cy=>fp(t=>[60+t,cy+45*Math.sin(t/113*Math.PI*2)],0,680,220))],
+  ['కొండ గీతలు','Hill lines',()=>[160,330].map(by=>fp(t=>[60+t,by-90*Math.abs(Math.sin(t/113.4*Math.PI))],0,680,260))],
+  ['గుండ్రని ఉచ్చులు','Loop lines',()=>[120,280].map(cy=>fp(t=>[90+14*t-38*Math.sin(t),cy+38*Math.cos(t)],0,44,420))],
+  ['వృత్తాలు','Circles',()=>{const L=[];[115,285].forEach(cy=>{for(let k=0;k<6;k++){const cx=110+k*116;L.push(fp(t=>[cx+45*Math.sin(t),cy-45*Math.cos(t)],0,Math.PI*2,70))}});return L}],
+  ['మెట్ల గీతలు','Step lines',()=>{const p=[[60,340]];let x=60,y=340;for(let s=0;s<8;s++){y+=s<4?-65:65;if(s===4)y-=65;p.push([x,y]);x+=85;p.push([x,y])}return[dens(p)]}],
+  ['సుడి గీత','Spiral',()=>[fp(t=>[400+8*t*Math.cos(t),200+8*t*Math.sin(t)],0,Math.PI*5.5,420)]]
+];
+function Tracing(){return st=>{
+  let i=0,raf=0;const n=PATTERNS.length;
+  st.innerHTML=`<div class="view"><div class="status" id="tt"></div><div class="board b21"><canvas width="800" height="400" id="tg"></canvas><canvas width="800" height="400" id="tu"></canvas><div class="pencil" id="pen">✏️</div></div>
+  <div class="bar"><button class="cb" tabindex="-1" data-a="prev">◀</button><button class="cb" tabindex="-1" data-a="go">✏️ దిద్ది చూపు</button><button class="cb" tabindex="-1" data-a="clear">🧽 తుడుపు</button><button class="cb" tabindex="-1" data-a="next">▶</button></div><div class="count" id="tn"></div></div>`;
+  const g=$('#tg').getContext('2d'),pen=$('#pen');const clear=attachDraw($('#tu'),'#3A86FF',12);let lines;
+  function guide(){cancelAnimationFrame(raf);pen.style.display='none';const [te,en,f]=PATTERNS[i];lines=f();
+    g.clearRect(0,0,800,400);g.lineCap=g.lineJoin='round';g.setLineDash([3,13]);g.strokeStyle='#8E9BBE';g.lineWidth=6;
+    lines.forEach(L=>{g.beginPath();L.forEach(([x,y],k)=>k?g.lineTo(x,y):g.moveTo(x,y));g.stroke()});g.setLineDash([]);
+    lines.forEach(L=>{g.fillStyle='#2A9D4F';g.beginPath();g.arc(L[0][0],L[0][1],9,0,7);g.fill()});
+    $('#tt').textContent=`${te} – ${en}`;$('#tn').textContent=`${i+1} / ${n}`}
+  function play(){guide();const seq=[];lines.forEach((L,li)=>L.forEach((p,k)=>seq.push([li,k,p])));const per=Math.max(2,Math.ceil(seq.length/230));let j=1;pen.style.display='block';
+    g.strokeStyle='#E63946';g.lineWidth=8;
+    const step=()=>{for(let s=0;s<per&&j<seq.length;s++,j++){const [li,k,p]=seq[j];if(k===0)continue;const q=lines[li][k-1];g.beginPath();g.moveTo(q[0],q[1]);g.lineTo(p[0],p[1]);g.stroke()}
+      const p=seq[Math.min(j,seq.length-1)][2];pen.style.left=p[0]/8+'%';pen.style.top=p[1]/4+'%';
+      if(j<seq.length)raf=requestAnimationFrame(step);else{pen.style.display='none';speak([[pick(PRAISE)+' ఇప్పుడు నువ్వు దిద్దు']])}};raf=requestAnimationFrame(step)}
+  const go=d=>{i=(i+d+n)%n;clear();guide();speak([[PATTERNS[i][0]]])};
+  st.querySelector('.bar').onclick=e=>{const a=e.target.closest('button')?.dataset.a;if(a==='prev')go(-1);if(a==='next')go(1);if(a==='go'){play();speak([[PATTERNS[i][0]]])}if(a==='clear')clear()};
+  guide();speak([[PATTERNS[i][0]]]);
+  hint('<kbd>◀ ▶</kbd> గీత మార్చు <kbd>OK</kbd> దిద్ది చూపు <kbd>▼</kbd> తుడుపు <kbd>Back</kbd> హోమ్ &nbsp; వేలితో దిద్దవచ్చు');
+  return{key:k=>{if(k==='left')go(-1);else if(k==='right')go(1);else if(k==='ok'||k==='up'){play();speak([[PATTERNS[i][0]]])}else if(k==='down')clear();else return false;return true},destroy:()=>cancelAnimationFrame(raf)};
+}}
+
+/* dot to dot */
+const heartPts=Array.from({length:14},(_,k)=>{const t=k/14*Math.PI*2;return[200+7.2*16*Math.sin(t)**3,135-7.2*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))]});
+const FIGS=[
+  ['త్రిభుజం','🔺','#3DDC97',[[200,40],[330,250],[70,250]]],
+  ['చతురస్రం','🟦','#3A86FF',[[100,50],[300,50],[300,250],[100,250]]],
+  ['గాలిపటం','🪁','#F15BB5',[[200,25],[300,135],[200,275],[100,135]]],
+  ['పడవ','⛵','#8D5524',[[50,170],[350,170],[295,245],[105,245]]],
+  ['ఇల్లు','🏠','#FF8C42',[[110,270],[110,140],[200,50],[290,140],[290,270]]],
+  ['నక్షత్రం','⭐','#FFD23F',starPts(200,155,130,52)],
+  ['చేప','🐟','#5BC0EB',[[60,150],[110,100],[200,80],[280,120],[345,75],[330,150],[345,225],[280,180],[200,220],[110,200]]],
+  ['హృదయం','❤️','#E63946',heartPts]
+];
+function Dots(){return st=>{
+  let i=0,k=0;const n=FIGS.length;
+  st.innerHTML=`<div class="view"><div class="status" id="dt"></div><div class="board b43"><svg viewBox="0 0 400 300" id="ds"></svg></div>
+  <div class="bar"><button class="cb" tabindex="-1" data-a="prev">◀</button><button class="cb" tabindex="-1" data-a="ok">➕ తర్వాత చుక్క</button><button class="cb" tabindex="-1" data-a="next">▶</button></div><div class="count" id="dn"></div></div>`;
+  function draw(){const [te,e,c,pts]=FIGS[i];const m=pts.length,done=k>=m;
+    const cx=pts.reduce((s,p)=>s+p[0],0)/m,cy=pts.reduce((s,p)=>s+p[1],0)/m;const ps=a=>a.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ');
+    let s=done?`<polygon points="${ps(pts)}" fill="${c}" fill-opacity=".45" stroke="${c}" stroke-width="5" stroke-linejoin="round"/>`:`<polyline points="${ps(pts.slice(0,k))}" fill="none" stroke="#3A86FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`;
+    pts.forEach((p,j)=>{const dx=p[0]-cx,dy=p[1]-cy,d=Math.hypot(dx,dy)||1;const lx=p[0]+dx/d*20,ly=p[1]+dy/d*20;const nx=!done&&j===k;
+      s+=`<circle cx="${p[0]}" cy="${p[1]}" r="${nx?11:7}" fill="${nx?'#FF8C42':j<k?'#3A86FF':'#14213D'}" class="${nx?'nextdot':''}"/><text x="${lx}" y="${ly}" font-size="17" font-weight="700" fill="#14213D" text-anchor="middle" dominant-baseline="central" font-family="system-ui,sans-serif">${j+1}</text>`});
+    $('#ds').innerHTML=s;$('#dt').textContent=done?`భలే! ఇది ${te} ${e}`:`1 నుండి ${m} వరకు చుక్కలు కలుపు`;$('#dn').textContent=`${i+1} / ${n}`}
+  function next(){const m=FIGS[i][3].length;if(k>=m){go(1);return}k++;if(k===m){draw();speak([[`${pick(PRAISE)} ఇది ${FIGS[i][0]}`]])}else{draw();speak([sayN(k)])}}
+  const go=d=>{i=(i+d+n)%n;k=0;draw();speak([['చుక్కలు కలుపుదాం']])};
+  st.querySelector('.bar').onclick=e=>{const a=e.target.closest('button')?.dataset.a;if(a==='prev')go(-1);if(a==='next')go(1);if(a==='ok')next()};
+  $('#ds').onclick=next;draw();speak([['చుక్కలు కలుపుదాం']]);
+  hint('<kbd>OK</kbd> తర్వాత చుక్క కలుపు <kbd>◀ ▶</kbd> బొమ్మ మార్చు <kbd>Back</kbd> హోమ్');
+  return{key:k2=>{if(k2==='left')go(-1);else if(k2==='right')go(1);else if(k2==='ok'||k2==='down'||k2==='up')next();else return false;return true}};
+}}
+
+/* maze */
+function genMaze(C,R){const cells=[];for(let y=0;y<R;y++)for(let x=0;x<C;x++)cells.push({x,y,w:[1,1,1,1],v:0});
+  const at=(x,y)=>cells[y*C+x],D=[[0,-1,0,2],[1,0,1,3],[0,1,2,0],[-1,0,3,1]],st=[at(0,0)];at(0,0).v=1;
+  while(st.length){const c=st[st.length-1];const nb=D.map(d=>[d,c.x+d[0],c.y+d[1]]).filter(([d,x,y])=>x>=0&&y>=0&&x<C&&y<R&&!at(x,y).v);
+    if(!nb.length){st.pop();continue}const[d,x,y]=pick(nb),nn=at(x,y);c.w[d[2]]=0;nn.w[d[3]]=0;nn.v=1;st.push(nn)}return{C,R,at}}
+function Maze(){return st=>{
+  const SIZES=[[5,3],[7,4],[9,5],[10,6],[12,7]];let lv=0,M,px,py,trail,won;
+  st.innerHTML=`<div class="view"><div class="status" id="mt"></div><div class="board b53"><canvas width="800" height="480" id="mc"></canvas></div>
+  <div class="dpad"><span></span><button tabindex="-1" data-d="up">▲</button><span></span><button tabindex="-1" data-d="left">◀</button><button tabindex="-1" data-d="ok">🔄</button><button tabindex="-1" data-d="right">▶</button><span></span><button tabindex="-1" data-d="down">▼</button><span></span></div></div>`;
+  const g=$('#mc').getContext('2d');let cs,ox,oy;
+  function fresh(){const[C,R]=SIZES[Math.min(lv,SIZES.length-1)];M=genMaze(C,R);px=py=0;trail=[[0,0]];won=false;cs=Math.min(780/C,460/R);ox=(800-cs*C)/2;oy=(480-cs*R)/2;draw();$('#mt').textContent=`🐭 ఎలుకను 🧀 జున్ను దగ్గరికి తీసుకెళ్ళు (స్థాయి ${lv+1})`}
+  function draw(){g.clearRect(0,0,800,480);const c=p=>[ox+(p[0]+.5)*cs,oy+(p[1]+.5)*cs];
+    g.strokeStyle='rgba(255,201,60,.7)';g.lineWidth=cs*.28;g.lineCap=g.lineJoin='round';g.beginPath();trail.forEach((p,k)=>{const[x,y]=c(p);k?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();
+    g.strokeStyle='#14213D';g.lineWidth=5;g.beginPath();
+    for(let y=0;y<M.R;y++)for(let x=0;x<M.C;x++){const w=M.at(x,y).w,X=ox+x*cs,Y=oy+y*cs;
+      if(w[0]){g.moveTo(X,Y);g.lineTo(X+cs,Y)}if(w[1]){g.moveTo(X+cs,Y);g.lineTo(X+cs,Y+cs)}if(w[2]){g.moveTo(X,Y+cs);g.lineTo(X+cs,Y+cs)}if(w[3]){g.moveTo(X,Y);g.lineTo(X,Y+cs)}}
+    g.stroke();g.font=`${cs*.62}px sans-serif`;g.textAlign='center';g.textBaseline='middle';
+    let[a,b]=c([M.C-1,M.R-1]);g.fillText('🧀',a,b);[a,b]=c([px,py]);g.fillText(won?'🎉':'🐭',a,b)}
+  function move(d){if(won){if(d==='ok'){lv++;fresh();speak([['కొత్త దారి']])}return}
+    if(d==='ok'){fresh();return}const di={up:0,right:1,down:2,left:3}[d],dx=[0,1,0,-1][di],dy=[-1,0,1,0][di];
+    if(M.at(px,py).w[di]){beep(false);return}px+=dx;py+=dy;
+    const pr=trail[trail.length-2];if(pr&&pr[0]===px&&pr[1]===py)trail.pop();else trail.push([px,py]);
+    if(px===M.C-1&&py===M.R-1){won=true;beep(true);speak([[`${pick(PRAISE)} జున్ను దొరికింది!`]]);$('#mt').textContent='భలే! 🎉 OK నొక్కితే తర్వాత స్థాయి'}draw()}
+  st.querySelector('.dpad').onclick=e=>{const d=e.target.closest('button')?.dataset.d;if(d)move(d)};
+  fresh();speak([['ఎలుకను జున్ను దగ్గరికి తీసుకెళ్ళు']]);
+  hint('<kbd>◀ ▲ ▼ ▶</kbd> ఎలుకను నడిపించు <kbd>OK</kbd> కొత్త దారి <kbd>Back</kbd> హోమ్');
+  return{key:k=>{if(['left','right','up','down','ok'].includes(k)){move(k);return true}return false}};
+}}
+
+/* coloring */
+const petals=Array.from({length:5},(_,k)=>{const a=(-90+k*72)*Math.PI/180;return['రేకు',`<circle cx="${(200+40*Math.cos(a)).toFixed(1)}" cy="${(105+40*Math.sin(a)).toFixed(1)}" r="28"/>`]});
+const PICS=[
+  ['ఇల్లు',[['సూర్యుడు','<circle cx="335" cy="60" r="35"/>'],['పైకప్పు','<polygon points="80,140 200,50 320,140"/>'],['గోడ','<rect x="100" y="140" width="200" height="130"/>'],['తలుపు','<rect x="180" y="195" width="40" height="75"/>'],['కిటికీ','<rect x="120" y="165" width="40" height="35"/>'],['కిటికీ','<rect x="240" y="165" width="40" height="35"/>'],['నేల','<rect x="10" y="270" width="380" height="24"/>']]],
+  ['పువ్వు',[['కాండం','<rect x="194" y="140" width="12" height="150"/>'],['ఆకు','<ellipse cx="165" cy="235" rx="34" ry="13" transform="rotate(-30 165 235)"/>'],['ఆకు','<ellipse cx="235" cy="205" rx="34" ry="13" transform="rotate(30 235 205)"/>'],...petals,['పువ్వు మధ్యభాగం','<circle cx="200" cy="105" r="24"/>']]],
+  ['చేప',[['తోక','<polygon points="290,150 372,88 372,212"/>'],['రెక్క','<polygon points="160,92 215,38 238,97"/>'],['శరీరం','<ellipse cx="190" cy="150" rx="115" ry="68"/>'],['కన్ను','<circle cx="115" cy="135" r="12"/>'],['బుడగ','<circle cx="55" cy="80" r="12"/>'],['బుడగ','<circle cx="35" cy="45" r="8"/>']]],
+  ['సీతాకోకచిలుక',[['పై రెక్క','<ellipse cx="140" cy="105" rx="70" ry="55" transform="rotate(-20 140 105)"/>'],['పై రెక్క','<ellipse cx="260" cy="105" rx="70" ry="55" transform="rotate(20 260 105)"/>'],['కింది రెక్క','<ellipse cx="155" cy="205" rx="50" ry="42" transform="rotate(25 155 205)"/>'],['కింది రెక్క','<ellipse cx="245" cy="205" rx="50" ry="42" transform="rotate(-25 245 205)"/>'],['శరీరం','<ellipse cx="200" cy="155" rx="14" ry="95"/>'],['తల','<circle cx="200" cy="55" r="20"/>']]]
+];
+function Coloring(){return st=>{
+  const pal=COLORS.filter(c=>c[0]!=='#9AA0A6');let pi=0,ri=0,ci=0;const fills=PICS.map(p=>p[1].map(()=>'#FFFFFF'));
+  st.innerHTML=`<div class="view"><div class="status" id="ct"></div><div class="board b43"><svg viewBox="0 0 400 300" id="cs"></svg></div><div class="pal" id="cp"></div></div>`;
+  function draw(){const parts=PICS[pi][1],L=parts.length;
+    $('#cs').innerHTML=parts.map(([nm,s],j)=>`<g class="rg${j===ri?' sel':''}" data-j="${j}" fill="${fills[pi][j]}" stroke="#14213D" stroke-width="4">${s}</g>`).join('');
+    $('#cp').innerHTML=pal.map((c,j)=>`<i data-c="${j}" class="${j===ci?'on':''}" style="background:${c[0]}"></i>`).join('')+`<button class="cb${ri===L?' on':''}" tabindex="-1" data-np="1">▶ తర్వాత బొమ్మ</button>`;
+    $('#ct').textContent=ri<L?`${PICS[pi][0]}: ${parts[ri][0]} – రంగు: ${pal[ci][1]}`:'OK నొక్కితే తర్వాత బొమ్మ'}
+  function fill(j){fills[pi][j]=pal[ci][0];draw();speak([[pal[ci][1]]])}
+  function key(k){const L=PICS[pi][1].length;
+    if(k==='left'){ri=(ri-1+L+1)%(L+1);draw();if(ri<L)speak([[PICS[pi][1][ri][0]]])}
+    else if(k==='right'){ri=(ri+1)%(L+1);draw();if(ri<L)speak([[PICS[pi][1][ri][0]]])}
+    else if(k==='up'||k==='down'){ci=(ci+(k==='down'?1:-1)+pal.length)%pal.length;draw();speak([[pal[ci][1]]])}
+    else if(k==='ok'){if(ri===L){pi=(pi+1)%PICS.length;ri=0;draw();speak([[PICS[pi][0]]])}else fill(ri)}
+    else return false;return true}
+  $('#cs').onclick=e=>{const g=e.target.closest('.rg');if(g){ri=+g.dataset.j;fill(ri)}};
+  $('#cp').onclick=e=>{const t=e.target;if(t.dataset.c){ci=+t.dataset.c;draw();speak([[pal[ci][1]]])}if(t.dataset.np){ri=PICS[pi][1].length;key('ok')}};
+  draw();speak([[`${PICS[pi][0]} బొమ్మకు రంగులు వేద్దాం`]]);
+  hint('<kbd>◀ ▶</kbd> భాగం ఎంచుకో <kbd>▲ ▼</kbd> రంగు మార్చు <kbd>OK</kbd> రంగు వేయి <kbd>Back</kbd> హోమ్');
+  return{key};
+}}
+
+/* ---------- quiz ---------- */
+function Quiz(gen){return st=>{
+  let sc=0,tot=0,cur,tried,locked;
+  st.innerHTML=`<div class="quiz"><div class="qtop"><button class="f hbtn" id="qs" aria-label="మళ్ళీ విను">🔊</button><div class="qq" id="qq"></div><div class="qsc" id="qc">✔ 0 / 0</div></div><div class="qvis" id="qv"></div><div class="qops" id="qo"></div></div>`;
+  $('#qs').onclick=()=>speak(cur.say);
+  function next(){cur=gen();tried=false;locked=false;$('#qq').textContent=cur.q;const v=$('#qv');v.innerHTML=cur.vis;v.classList.remove('pop');void v.offsetWidth;v.classList.add('pop');
+    const o=$('#qo');o.style.gridTemplateColumns=cur.opts.length===3?'repeat(3,1fr)':'1fr 1fr';
+    o.innerHTML=cur.opts.map((x,j)=>`<button class="f opt ${x.c||''}" data-j="${j}" ${x.say?`data-say='${JSON.stringify(x.say).replace(/'/g,'&#39;')}'`:''}>${x.h}</button>`).join('');
+    o.querySelector('.opt').focus({preventScroll:true});navKey=false;speak(cur.say)}
+  $('#qo').onclick=e=>{const b=e.target.closest('.opt');if(!b||locked)return;const x=cur.opts[+b.dataset.j];
+    if(String(x.v)===String(cur.ans)){locked=true;b.classList.add('ok');beep(true);if(!tried)sc++;tot++;$('#qc').textContent=`✔ ${sc} / ${tot}`;speak([[pick(PRAISE)],...(cur.after||[]),...(cur.why?[[cur.why]]:[])]);
+      if(cur.why){$('#qv').insertAdjacentHTML('beforeend',`<div class="why">✔ ${cur.why}</div>`);const nb=document.createElement('button');nb.className='f opt nextq';nb.style.gridColumn='1/-1';nb.textContent='తర్వాత ప్రశ్న ▶';nb.onclick=ev=>{ev.stopPropagation();next()};$('#qo').appendChild(nb);navKey=false;nb.focus()}
+      else setTimeout(next,1900)}
+    else{if(!tried){tried=true}b.classList.remove('no');void b.offsetWidth;b.classList.add('no');beep(false);speak([['మళ్ళీ ప్రయత్నించు']])}};
+  next();
+  hint('<kbd>◀ ▲ ▼ ▶</kbd> జవాబు ఎంచుకో <kbd>OK</kbd> నిర్ధారించు <kbd>⏯</kbd> ప్రశ్న మళ్ళీ విను <kbd>Back</kbd> హోమ్');
+  return{key:k=>{if(k==='play'){speak(cur.say);return true}return false}};
+}}
+const numOpts=(ans,lo,hi,k=4)=>{const s=new Set([ans]);let g=0;const a=Math.max(lo,ans-3),b=Math.min(hi,ans+3);while(s.size<k&&g++<60)s.add(a+rnd(b-a+1));g=0;while(s.size<k&&g++<200)s.add(lo+rnd(hi-lo+1));return shuffle([...s])};
+const nOpt=v=>({h:String(v),v,say:[sayN(v)],c:'lat'});
+const seqHTML=(arr,b,cls='')=>`<div class="seq ${cls}">${arr.map((x,j)=>j===b?'<span class="q">?</span>':`<span>${x}</span>`).join('')}</div>`;
+const CNT=['🍎','⭐','🎈','🐟','🌸','🚗','🍌','🐤','⚽','🍭'];
+const POOL=[...ANI,...BIRD,...FRU,...VEG];
+const GRP=[[FRU,'పండు','పండా'],[VEG,'కూరగాయ','కూరగాయా'],[ANI,'జంతువు','జంతువా'],[BIRD,'పక్షి','పక్షియా']];
+const TV=['అ','ఆ','ఇ','ఈ','ఉ','ఊ','ఋ','ఎ','ఏ','ఐ','ఒ','ఓ','ఔ','అం','అః'];
+const TC=CON.map(c=>c[0]).filter(c=>!['ఙ','ఞ','క్ష','ఱ'].includes(c));
+const AZ='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+function clockSVG(h,m){const ha=(h%12+m/60)*30,ma=m*6;let t='';for(let i=1;i<=12;i++){const a=i*Math.PI/6;t+=`<text x="${(100+72*Math.sin(a)).toFixed(1)}" y="${(100-72*Math.cos(a)).toFixed(1)}">${i}</text>`}
+  return `<svg viewBox="0 0 200 200" class="clock"><circle cx="100" cy="100" r="92" fill="#FFFDF6" stroke="#FF8C42" stroke-width="8"/>${t}<line x1="100" y1="100" x2="100" y2="54" stroke="#14213D" stroke-width="9" stroke-linecap="round" transform="rotate(${ha} 100 100)"/><line x1="100" y1="100" x2="100" y2="30" stroke="#E63946" stroke-width="5" stroke-linecap="round" transform="rotate(${ma} 100 100)"/><circle cx="100" cy="100" r="7" fill="#14213D"/></svg>`}
+const timeSay=(h,m)=>m?HALF[h]:h===1?'ఒంటి గంట':`${TEN[h]} గంటలు`;
+const RIDDLES=[
+  ['నాకు నాలుగు కాళ్ళు ఉన్నాయి, కానీ నడవలేను. మీరు నాపై కూర్చుంటారు. నేను ఎవరు?','🪑|కుర్చీ;🐕|కుక్క;🚗|కారు;🌳|చెట్టు'],
+  ['పగలు వస్తాను, రాత్రి వెళ్ళిపోతాను. అందరికీ వెలుగు ఇస్తాను. నేను ఎవరు?','☀️|సూర్యుడు;🌙|చంద్రుడు;⭐|నక్షత్రం;🔥|మంట'],
+  ['నాకు రెండు చక్రాలు. కాళ్ళతో తొక్కితే ముందుకు వెళ్తాను. నేను ఎవరు?','🚲|సైకిల్;🚗|కారు;🚌|బస్సు;✈️|విమానం'],
+  ['నేను పసుపు రంగులో ఉంటాను. కోతికి నేనంటే చాలా ఇష్టం. నేను ఎవరు?','🍌|అరటిపండు;🍎|ఆపిల్;🍇|ద్రాక్ష;🥕|క్యారెట్'],
+  ['నేను ఇంటికి కాపలా కాస్తాను. భౌ భౌ అని అరుస్తాను. నేను ఎవరు?','🐕|కుక్క;🐈|పిల్లి;🐄|ఆవు;🐐|మేక'],
+  ['నాకు ముళ్ళు ఉన్నాయి కానీ గుచ్చుకోవు. సమయం చెప్తాను. నేను ఎవరు?','🕰️|గడియారం;🌵|కాక్టస్;📖|పుస్తకం;🔔|గంట'],
+  ['నీళ్ళలోనే ఉంటాను. నాకు కాళ్ళు లేవు, కానీ ఈదుతాను. నేను ఎవరు?','🐟|చేప;🐢|తాబేలు;🦆|బాతు;🐸|కప్ప'],
+  ['ఆకాశంలో ఎగురుతాను. నాకు దారం ఉంటుంది. నేను ఎవరు?','🪁|గాలిపటం;🐦|పిచ్చుక;✈️|విమానం;🎈|బెలూన్'],
+  ['వర్షం వస్తే నన్ను తెరుస్తారు. మిమ్మల్ని తడవకుండా కాపాడుతాను. నేను ఎవరు?','☂️|గొడుగు;🎩|టోపీ;👟|బూటు;🎒|సంచి'],
+  ['నేను చల్లగా, తియ్యగా ఉంటాను. ఎండలో కరిగిపోతాను. నేను ఎవరు?','🍦|ఐస్‌క్రీమ్;🍞|రొట్టె;🍫|చాక్లెట్;🥛|పాలు'],
+  ['నాలో పేజీలు ఉంటాయి. నన్ను చదువుతారు. నేను ఎవరు?','📖|పుస్తకం;✏️|పెన్సిల్;🎒|సంచి;🪑|కుర్చీ'],
+  ['తెల్లవారగానే కొక్కొరొకో అని అందరినీ నిద్ర లేపుతాను. నేను ఎవరు?','🐓|కోడిపుంజు;🦆|బాతు;🦜|చిలుక;🦉|గుడ్లగూబ'],
+  ['నాకు పొడవైన తొండం ఉంది. నేను చాలా పెద్ద జంతువును. నేను ఎవరు?','🐘|ఏనుగు;🐎|గుర్రం;🦒|జిరాఫీ;🐪|ఒంటె'],
+  ['రాత్రి ఆకాశంలో మెరుస్తాను. కొన్ని రోజులు గుండ్రంగా, కొన్ని రోజులు సగంగా ఉంటాను. నేను ఎవరు?','🌙|చంద్రుడు;☀️|సూర్యుడు;💡|బల్బు;🔥|మంట']
+];
+let rq=[];
+const GEN={
+  counting(){const n=1+rnd(10),e=pick(CNT);return{q:'ఎన్ని ఉన్నాయి? లెక్కపెట్టు',say:[['ఎన్ని ఉన్నాయి? లెక్కపెట్టు']],vis:Array(n).fill(`<span>${e}</span>`).join(''),opts:numOpts(n,1,10).map(nOpt),ans:n,after:[[TEN[n]]]}},
+  matching(){const a=pick(POOL),G=GRP.find(g=>g[0].includes(a))[0],o=shuffle([a,...shuffle(G.filter(x=>x!==a)).slice(0,3)]);
+    if(Math.random()<.6)return{q:'ఈ బొమ్మ పేరు ఏమిటి?',say:[['ఈ బొమ్మ పేరు ఏమిటి?']],vis:`<span class="qbig">${a[0]}</span>`,opts:o.map(x=>({h:`${x[1]}<small>${x[2]}</small>`,v:x[1],say:[[x[1]]]})),ans:a[1],after:[[a[1]],[a[2],'en']]};
+    return{q:`${a[1]} బొమ్మ ఏది?`,say:[[`${a[1]} బొమ్మ ఏది?`]],vis:`<span class="qword">${a[1]}</span>`,opts:o.map(x=>({h:`<span class="oe">${x[0]}</span>`,v:x[1]})),ans:a[1],after:[[a[1]]]}},
+  missLetters(){const t=rnd(4);
+    if(t<3){const L=[TV,TC,AZ][t],lang=t===2?'en':'te',s=rnd(L.length-3),seq=L.slice(s,s+4),b=rnd(4),ans=seq[b];
+      const o=shuffle([ans,...shuffle(L.filter(x=>x!==ans)).slice(0,3)]);
+      return{q:'ఖాళీలో వచ్చే అక్షరం ఏది?',say:[['ఖాళీలో వచ్చే అక్షరం ఏది?']],vis:seqHTML(seq,b,t===2?'lat':''),opts:o.map(x=>({h:x,v:x,say:[[x,lang]],c:t===2?'lat':''})),ans,after:[[ans,lang]]}}
+    const[e,w,te]=pick(WORDS),W=w.toUpperCase().split(''),b=rnd(W.length),ans=W[b];
+    const o=shuffle([ans,...shuffle(AZ.filter(x=>x!==ans)).slice(0,3)]);
+    return{q:`${te} – ఖాళీలో వచ్చే అక్షరం ఏది?`,say:[[`${te}. ఖాళీలో వచ్చే అక్షరం ఏది?`]],vis:`<span class="qbig" style="font-size:1.6em">${e}</span>${seqHTML(W,b,'lat')}`,opts:o.map(x=>({h:x,v:x,say:[[x,'en']],c:'lat'})),ans,after:[[`${W.join(', ')}. ${w}`,'en']]}},
+  missNumbers(){const s=1+rnd(95),seq=[s,s+1,s+2,s+3],b=rnd(4),ans=seq[b];const pool=[-10,10,-2,2,5,-5,4,-4,1,-1].map(d=>ans+d).filter(v=>v>0&&!seq.includes(v));
+    return{q:'ఖాళీలో వచ్చే సంఖ్య ఏది?',say:[['ఖాళీలో వచ్చే సంఖ్య ఏది?']],vis:seqHTML(seq,b,'lat'),opts:shuffle([ans,...shuffle(pool).slice(0,3)]).map(nOpt),ans,after:[sayN(ans)]}},
+  add(){const a=1+rnd(5),b=1+rnd(5),e=pick(CNT),s=a+b;return{q:`${a} + ${b} = ఎంత?`,say:[[`${TEN[a]} కలుపు ${TEN[b]} ఎంత?`]],
+    vis:`${Array(a).fill(`<span>${e}</span>`).join('')}<span class="op">+</span>${Array(b).fill(`<span>${e}</span>`).join('')}`,opts:numOpts(s,1,10).map(nOpt),ans:s,after:[[`${TEN[a]} కలుపు ${TEN[b]} సమానం ${TEN[s]}`]]}},
+  sub(){const a=2+rnd(9),b=1+rnd(a-1),e=pick(CNT),d=a-b;return{q:`${a} − ${b} = ఎంత?`,say:[[`${TEN[a]} తీసివేత ${TEN[b]} ఎంత?`]],
+    vis:Array.from({length:a},(_,j)=>`<span class="${j>=a-b?'gone':''}">${e}</span>`).join(''),opts:numOpts(d,0,10).map(nOpt),ans:d,after:[[`${TEN[a]} తీసివేత ${TEN[b]} సమానం ${TEN[d]}`]]}},
+  time(){const h=1+rnd(12),m=pick([0,30]),f=(H,M)=>`${H}:${M?'30':'00'}`;const s=new Set([f(h,m),f(h,m?0:30),f(h%12+1,m),f((h+10)%12+1,m)]);
+    return{q:'గడియారంలో సమయం ఎంత?',say:[['గడియారంలో సమయం ఎంత?']],vis:clockSVG(h,m),opts:shuffle([...s]).map(x=>{const[H,M]=x.split(':').map(Number);return{h:x,v:x,c:'lat',say:[[timeSay(H,M)]]}}),ans:f(h,m),after:[[timeSay(h,m)]]}},
+  sorting(){const pr=pick([[0,1],[2,3]]),k=rnd(2),it=pick(GRP[pr[k]][0]);const[A,B]=[GRP[pr[0]],GRP[pr[1]]];
+    return{q:`ఇది ${A[2]}? ${B[2]}?`,say:[[`${it[1]}. ఇది ${A[2]}, ${B[2]}?`]],vis:`<span class="qbig">${it[0]}</span>`,opts:pr.map(g=>({h:`${GRP[g][0][0][0]} ${GRP[g][1]}`,v:g,say:[[GRP[g][1]]]})),ans:pr[k],after:[[`${it[1]} ఒక ${GRP[pr[k]][1]}`]]}},
+  pattern(){const sym=shuffle(['🔴','🔵','🟢','🟡','🟣','⭐','🔺','🟧','❤️','🌙']).slice(0,3),u=pick([[0,1],[0,0,1],[0,1,1],[0,1,2]]);
+    const seq=Array.from({length:7},(_,j)=>sym[u[j%u.length]]),ans=seq[6];
+    return{q:'తర్వాత వచ్చేది ఏది?',say:[['వరుసను గమనించు. తర్వాత వచ్చేది ఏది?']],vis:seqHTML(seq,6),opts:shuffle(sym).map(x=>({h:`<span class="oe">${x}</span>`,v:x})),ans}},
+  logic(){const t=rnd(4);
+    if(t===0){const pr=shuffle(pick([[0,1],[2,3],[0,2],[1,3]])),A=shuffle(GRP[pr[0]][0]).slice(0,3),B=pick(GRP[pr[1]][0]);
+      return{q:'వేరుగా ఉన్నది ఏది?',say:[['వీటిలో వేరుగా ఉన్నది ఏది?']],vis:'<span class="qbig">🤔</span>',opts:shuffle([...A,B]).map(x=>({h:`<span class="oe">${x[0]}</span>`,v:x[1],say:[[x[1]]]})),ans:B[1],after:[[`${B[1]} ఒక ${GRP[pr[1]][1]}, మిగతావి ${GRP[pr[0]][1]}లు`]]}}
+    if(t===1){const s=new Set();while(s.size<4)s.add(1+rnd(50));const a=[...s],big=Math.random()<.5,ans=big?Math.max(...a):Math.min(...a),q=big?'వీటిలో పెద్ద సంఖ్య ఏది?':'వీటిలో చిన్న సంఖ్య ఏది?';
+      return{q,say:[[q]],vis:'<span class="qbig">🔢</span>',opts:a.map(nOpt),ans,after:[sayN(ans)]}}
+    if(t===2){const SZ=[['🐜','చీమ'],['🐭','ఎలుక'],['🐈','పిల్లి'],['🐕','కుక్క'],['🐄','ఆవు'],['🐘','ఏనుగు']];const ix=shuffle([0,1,2,3,4,5]).slice(0,3),big=Math.random()<.5,a=SZ[big?Math.max(...ix):Math.min(...ix)],q=big?'వీటిలో ఏది పెద్దది?':'వీటిలో ఏది చిన్నది?';
+      return{q,say:[[q]],vis:'<span class="qbig">⚖️</span>',opts:ix.map(j=>({h:`<span class="oe">${SZ[j][0]}</span><small>${SZ[j][1]}</small>`,v:SZ[j][1],say:[[SZ[j][1]]]})),ans:a[1],after:[[a[1]]]}}
+    const n=2+rnd(60),aft=Math.random()<.5,ans=aft?n+1:n-1,q=aft?`${n} తర్వాత వచ్చే సంఖ్య ఏది?`:`${n} కి ముందు వచ్చే సంఖ్య ఏది?`;
+    return{q,say:[[aft?`${n} తర్వాత వచ్చే సంఖ్య ఏది?`:`${n} కి ముందు వచ్చే సంఖ్య ఏది?`]],vis:`<span class="qword lat">${n}</span>`,opts:numOpts(ans,Math.max(0,ans-4),ans+4).map(nOpt),ans,after:[sayN(ans)]}},
+  puzzle(){if(!rq.length)rq=shuffle(RIDDLES);const[t,o]=rq.pop(),op=P(o),ans=op[0][1];
+    return{q:'పొడుపు కథ – జవాబు చెప్పు',say:[[t]],vis:`<p class="qtext">${t}</p>`,opts:shuffle(op).map(x=>({h:`<span class="oe">${x[0]}</span><small>${x[1]}</small>`,v:x[1],say:[[x[1]]]})),ans,after:[[`జవాబు ${ans}`]]}}
+};
+
+/* ---------- think: data ---------- */
+const VEH=P(`🚗|కారు;🚌|బస్సు;🚲|సైకిల్;✈️|విమానం;🚂|రైలు;🛵|స్కూటర్;🚢|ఓడ`);
+const CLO=P(`👕|చొక్కా;👖|ప్యాంటు;👗|గౌను;🧦|సాక్సులు;🧢|టోపీ;👟|బూట్లు`);
+const STA=P(`✏️|పెన్సిల్;📏|స్కేలు;✂️|కత్తెర;📖|పుస్తకం;🖍️|క్రేయాన్;🖊️|పెన్ను`);
+const EXT=[...GRP.map(g=>[g[0],g[1]]),[VEH,'వాహనం'],[CLO,'బట్ట'],[STA,'బడి వస్తువు']];
+const ORDERS=[
+  [P(`🐜|చీమ;🐭|ఎలుక;🐈|పిల్లి;🐕|కుక్క;🐄|ఆవు;🐘|ఏనుగు`),'వీటిలో ఏది పెద్దది?','వీటిలో ఏది చిన్నది?','⚖️'],
+  [P(`🪶|ఈక;🍃|ఆకు;🍎|ఆపిల్;🍉|పుచ్చకాయ;🪨|బండరాయి;🐘|ఏనుగు`),'వీటిలో ఏది ఎక్కువ బరువు?','వీటిలో ఏది తేలికైనది?','🏋️'],
+  [P(`🐭|ఎలుక;🐕|కుక్క;🐎|గుర్రం;🦒|జిరాఫీ;🌴|కొబ్బరిచెట్టు;🏢|భవనం`),'వీటిలో ఏది ఎత్తైనది?','వీటిలో ఏది పొట్టిది?','📏'],
+  [P(`🐌|నత్త;🐢|తాబేలు;🚲|సైకిల్;🚗|కారు;✈️|విమానం`),'వీటిలో ఏది వేగంగా వెళ్తుంది?','వీటిలో ఏది నెమ్మదిగా వెళ్తుంది?','🏁']
+];
+const REAL=P(`
+🩹|నీ స్నేహితుడు ఆడుకుంటూ కింద పడ్డాడు. మోకాలికి దెబ్బ తగిలింది. నువ్వు ఏం చేయాలి?|పెద్దవాళ్ళకు చెప్పి సహాయం చేయాలి|చూసి నవ్వాలి|పట్టించుకోకుండా ఆడుకోవాలి|భయపడి పారిపోవాలి|దెబ్బ తగిలిన వారికి సహాయం చేయడం మంచి పని.;
+🚦|రోడ్డు దాటాలి. సిగ్నల్‌లో ఎర్ర లైటు వెలుగుతోంది. ఏం చేయాలి?|ఆగాలి|పరుగెత్తి దాటాలి|కళ్ళు మూసుకుని దాటాలి|రోడ్డు మధ్యలో నిలబడాలి|ఎర్ర లైటు అంటే ఆగాలి. ఆకుపచ్చ లైటు వచ్చాక జాగ్రత్తగా దాటాలి.;
+🍫|తెలియని వ్యక్తి చాక్లెట్ ఇచ్చి తనతో రమ్మంటున్నాడు. ఏం చేయాలి?|వెళ్ళకూడదు, అమ్మానాన్నలకు చెప్పాలి|చాక్లెట్ తీసుకుని వెళ్ళాలి|అతని ఇల్లు ఎక్కడో అడగాలి|ఎవరికీ చెప్పకూడదు|తెలియని వారితో ఎప్పుడూ వెళ్ళకూడదు. వెంటనే పెద్దవాళ్ళకు చెప్పాలి.;
+🚰|నీళ్ళ కుళాయి తెరిచి ఉంది, నీరు వృథాగా పోతోంది. ఏం చేయాలి?|కుళాయి కట్టేయాలి|అలాగే వదిలేయాలి|ఇంకా ఎక్కువ తెరవాలి|నీళ్ళతో ఆడుకోవాలి|నీరు చాలా విలువైనది. వృథా చేయకూడదు.;
+🔥|ఇంట్లో అగ్గిపెట్టె కనిపించింది. ఏం చేయాలి?|తాకకుండా పెద్దవాళ్ళకు చెప్పాలి|వెలిగించి ఆడుకోవాలి|జేబులో పెట్టుకోవాలి|స్నేహితులకు వెలిగించి చూపించాలి|అగ్గిపెట్టెతో ఆడుకోవడం చాలా ప్రమాదం.;
+😢|కొత్తగా బడికి వచ్చిన పిల్లవాడు ఒంటరిగా ఏడుస్తున్నాడు. ఏం చేయాలి?|దగ్గరికి వెళ్ళి స్నేహం చేయాలి|ఇంకా ఏడిపించాలి|దూరంగా వెళ్ళిపోవాలి|అతని పుస్తకాలు దాచాలి|అందరితో స్నేహంగా ఉండాలి.;
+🍌|అరటిపండు తిన్నాక తొక్క ఏం చేయాలి?|చెత్తబుట్టలో వేయాలి|రోడ్డు మీద పడేయాలి|మెట్ల మీద వేయాలి|బెంచి కింద దాచాలి|రోడ్డు మీద తొక్కపై కాలు వేస్తే ఎవరైనా జారి పడతారు.;
+👛|దారిలో ఎవరో పోగొట్టుకున్న పర్సు దొరికింది. ఏం చేయాలి?|టీచర్‌కు లేదా పెద్దవాళ్ళకు ఇవ్వాలి|డబ్బులు ఖర్చు చేయాలి|ఇంట్లో దాచుకోవాలి|పారేయాలి|ఇతరుల వస్తువు వాళ్ళకే చేరాలి. నిజాయితీ మంచి గుణం.;
+🤧|నీకు తుమ్ము వస్తోంది. ఏం చేయాలి?|రుమాలు లేదా మోచేయి అడ్డు పెట్టుకోవాలి|పక్కవారి ముఖం వైపు తుమ్మాలి|ఆహారం మీద తుమ్మాలి|చేతితో కళ్ళు రుద్దుకోవాలి|అలా చేస్తే క్రిములు ఇతరులకు వ్యాపించవు.;
+🌧️|బయట వర్షం పడుతోంది. నువ్వు బడికి వెళ్ళాలి. ఏం తీసుకెళ్ళాలి?|గొడుగు|నల్ల కళ్ళద్దాలు|గాలిపటం|ఫ్యాన్|గొడుగు వర్షంలో తడవకుండా కాపాడుతుంది.;
+⚡|తడి చేతులతో కరెంటు స్విచ్ వేయవచ్చా?|వేయకూడదు, ముందు చేతులు తుడుచుకోవాలి|వేయవచ్చు|ఇంకా నీళ్ళు చల్లి వేయాలి|కాలితో వేయాలి|తడి చేతులతో కరెంటు తాకితే షాక్ కొడుతుంది.;
+🧸|నీ తమ్ముడు నీ బొమ్మతో ఆడుకోవాలని అడుగుతున్నాడు. ఏం చేయాలి?|ఇద్దరూ కలిసి పంచుకుని ఆడుకోవాలి|లాక్కుని దాచేయాలి|తమ్ముడిని కొట్టాలి|బొమ్మ విరగ్గొట్టాలి|పంచుకోవడం మంచి అలవాటు.;
+🍽️|భోజనం చేసే ముందు ఏం చేయాలి?|చేతులు సబ్బుతో కడుక్కోవాలి|మట్టిలో ఆడుకోవాలి|చేతులు జేబులో పెట్టాలి|కుక్కను ముట్టుకోవాలి|చేతులకు అంటిన క్రిములు కడిగితే పోతాయి.;
+🐕|వీధి కుక్క గట్టిగా మొరుగుతోంది. ఏం చేయాలి?|రాయి వేయకుండా నెమ్మదిగా దూరం వెళ్ళాలి|రాయితో కొట్టాలి|దాని తోక లాగాలి|దాని వెనక పరుగెత్తాలి|జంతువులను ఏడిపిస్తే అవి కరుస్తాయి.;
+📚|హోంవర్క్ పూర్తి కాలేదు, కానీ ఆడుకోవాలని ఉంది. ఏం చేయాలి?|ముందు హోంవర్క్ పూర్తి చేసి తర్వాత ఆడాలి|హోంవర్క్ వదిలేయాలి|పుస్తకం దాచేయాలి|టీచర్‌కు అబద్ధం చెప్పాలి|ముందు పని, తర్వాత ఆట.;
+✋|టీచర్ పాఠం చెప్తున్నప్పుడు నీకు సందేహం వచ్చింది. ఏం చేయాలి?|చేయి ఎత్తి అడగాలి|గట్టిగా అరవాలి|పక్కవాడితో మాట్లాడాలి|బయటికి వెళ్ళిపోవాలి|చేయి ఎత్తి అడగడం మంచి క్రమశిక్షణ.;
+🌱|ఇంటి ముందు మొక్క ఎండిపోతోంది. ఏం చేయాలి?|నీళ్ళు పోయాలి|పీకేయాలి|ఆకులు తెంపాలి|దాని మీద చెత్త వేయాలి|మొక్కలు బతకాలంటే నీరు కావాలి.;
+👵|బస్సులో ఒక బామ్మ నిలబడి ఉంది, నువ్వు కూర్చున్నావు. ఏం చేయాలి?|లేచి ఆమెకు సీటు ఇవ్వాలి|కిటికీ బయట చూస్తూ ఉండాలి|బ్యాగ్ పక్క సీటులో పెట్టాలి|నిద్రపోతున్నట్టు నటించాలి|పెద్దవారికి సహాయం చేయాలి.;
+💡|ఎవరూ లేని గదిలో ఫ్యాన్, లైటు తిరుగుతున్నాయి. ఏం చేయాలి?|స్విచ్ ఆఫ్ చేయాలి|అలాగే వదిలేయాలి|ఇంకో లైటు కూడా వేయాలి|టీవీ కూడా ఆన్ చేయాలి|విద్యుత్తును పొదుపు చేయాలి.;
+✏️|పొరపాటున స్నేహితుడి పెన్సిల్ విరిగిపోయింది. ఏం చేయాలి?|సారీ చెప్పి నిజం చెప్పాలి|దాచేయాలి|వేరే వాళ్ళు విరగ్గొట్టారని చెప్పాలి|నవ్వాలి|తప్పు జరిగితే నిజం చెప్పి క్షమాపణ అడగాలి.;
+🏊|చెరువు దగ్గర ఆడుకుంటున్నారు. స్నేహితుడు నీళ్ళలోకి దిగుదాం అంటున్నాడు. ఏం చేయాలి?|పెద్దవాళ్ళు లేకుండా నీళ్ళలోకి దిగకూడదు|వెంటనే దూకాలి|లోతు చూడటానికి మధ్యకు వెళ్ళాలి|ఎవరికీ చెప్పకుండా వెళ్ళాలి|పెద్దవాళ్ళు లేకుండా నీళ్ళ దగ్గరికి వెళ్ళడం ప్రమాదం.;
+🤒|నీకు జ్వరంగా ఉంది. ఏం చేయాలి?|అమ్మానాన్నలకు చెప్పి డాక్టర్ దగ్గరికి వెళ్ళాలి|ఐస్‌క్రీమ్ తినాలి|ఎండలో ఆడుకోవాలి|ఎవరికీ చెప్పకూడదు|జబ్బు చేస్తే పెద్దవాళ్ళకు చెప్పి డాక్టర్ సలహా తీసుకోవాలి.;
+🛣️|బడికి నడిచి వెళ్తున్నావు. రోడ్డు మీద ఎటువైపు నడవాలి?|రోడ్డు పక్కన, ఫుట్‌పాత్ మీద|రోడ్డు మధ్యలో|వాహనాల మధ్యలో పరుగెత్తుతూ|వెనక్కి చూస్తూ మధ్యలో|రోడ్డు పక్కనే జాగ్రత్తగా నడవాలి.;
+🎁|స్నేహితుడు నీకు పుట్టినరోజు బహుమతి ఇచ్చాడు. ఏం చెప్పాలి?|ధన్యవాదాలు|ఇది నాకు నచ్చలేదు|ఇంకోటి కావాలి|ఏమీ చెప్పకూడదు|ఎవరైనా సహాయం చేసినా, బహుమతి ఇచ్చినా ధన్యవాదాలు చెప్పాలి.`);
+const GK=P(`
+🦚|మన జాతీయ పక్షి ఏది?|నెమలి|చిలుక|కాకి|పావురం|;
+🐅|మన జాతీయ జంతువు ఏది?|పులి|సింహం|ఏనుగు|ఆవు|;
+🪷|మన జాతీయ పుష్పం ఏది?|తామర పువ్వు|గులాబీ|మల్లెపువ్వు|బంతిపువ్వు|;
+🥭|మన జాతీయ ఫలం ఏది?|మామిడిపండు|అరటిపండు|ఆపిల్|ద్రాక్ష|;
+🇮🇳|మన జాతీయ జెండాలో ఎన్ని రంగుల పట్టీలు ఉన్నాయి?|మూడు|రెండు|నాలుగు|ఐదు|కాషాయం, తెలుపు, ఆకుపచ్చ. మధ్యలో నీలి రంగు అశోక చక్రం.;
+☸️|మన జెండా మధ్యలో ఉన్న చక్రం పేరు ఏమిటి?|అశోక చక్రం|సైకిల్ చక్రం|బండి చక్రం|గడియారం|అశోక చక్రంలో 24 ఆకులు ఉంటాయి.;
+🌅|సూర్యుడు ఏ దిక్కున ఉదయిస్తాడు?|తూర్పు|పడమర|ఉత్తరం|దక్షిణం|సూర్యుడు తూర్పున ఉదయించి పడమర అస్తమిస్తాడు.;
+📅|వారానికి ఎన్ని రోజులు?|ఏడు|ఐదు|ఆరు|ఎనిమిది|;
+🗓️|సంవత్సరానికి ఎన్ని నెలలు?|పన్నెండు|పది|ఏడు|పదకొండు|;
+🌈|ఇంద్రధనుస్సులో ఎన్ని రంగులు ఉంటాయి?|ఏడు|మూడు|ఐదు|పది|;
+🐄|మనకు పాలు ఇచ్చే జంతువు ఏది?|ఆవు|కుక్క|పిల్లి|గుర్రం|;
+🐝|మనకు తేనె ఇచ్చేది ఏది?|తేనెటీగ|చీమ|దోమ|సీతాకోకచిలుక|;
+🐑|ఉన్ని మనకు ఏ జంతువు నుండి వస్తుంది?|గొర్రె|గుర్రం|గేదె|పంది|;
+🕷️|సాలెపురుగుకు ఎన్ని కాళ్ళు ఉంటాయి?|ఎనిమిది|ఆరు|నాలుగు|పది|;
+🐜|చీమకు ఎన్ని కాళ్ళు ఉంటాయి?|ఆరు|ఎనిమిది|నాలుగు|రెండు|కీటకాలన్నింటికీ ఆరు కాళ్ళు ఉంటాయి.;
+✋|రెండు చేతులకు కలిపి ఎన్ని వేళ్ళు?|పది|ఐదు|ఎనిమిది|పన్నెండు|ఒక్కో చేతికి ఐదు, రెండు చేతులకు పది.;
+👂|మనం దేనితో వింటాం?|చెవులు|కళ్ళు|ముక్కు|నాలుక|;
+👅|రుచి దేనితో తెలుస్తుంది?|నాలుక|చెవి|కన్ను|ముక్కు|;
+🌳|మనకు ప్రాణవాయువు ఎక్కువగా ఇచ్చేవి ఏవి?|చెట్లు|రాళ్ళు|కార్లు|ఇళ్ళు|అందుకే చెట్లు నాటాలి.;
+🧊|నీరు బాగా చల్లబడి గడ్డకడితే ఏమవుతుంది?|మంచు|పాలు|ఆవిరి|ఇసుక|;
+♨️|నీటిని బాగా మరిగిస్తే ఏమవుతుంది?|ఆవిరి|మంచు|రాయి|పాలు|;
+🐪|ఎడారి ఓడ అని దేనిని అంటారు?|ఒంటె|ఏనుగు|గుర్రం|పడవ|ఒంటె చాలా రోజులు నీళ్ళు తాగకుండా ఎడారిలో నడవగలదు.;
+🦁|అడవికి రాజు అని దేనిని అంటారు?|సింహం|కోతి|నక్క|ఏనుగు|;
+🐘|నేల మీద నివసించే జంతువుల్లో అన్నిటికంటే పెద్దది ఏది?|ఏనుగు|గుర్రం|జిరాఫీ|ఒంటె|;
+🌾|మనకు బియ్యం, కూరగాయలు పండించేది ఎవరు?|రైతు|డాక్టర్|పోలీసు|దర్జీ|;
+🏥|జబ్బు చేస్తే ఎవరి దగ్గరికి వెళ్తాం?|డాక్టర్|పోస్ట్‌మ్యాన్|డ్రైవర్|రైతు|;
+✉️|ఉత్తరాలు ఇంటికి తెచ్చేది ఎవరు?|పోస్ట్‌మ్యాన్|రైతు|దర్జీ|కుమ్మరి|;
+🧵|బట్టలు కుట్టేది ఎవరు?|దర్జీ|కుమ్మరి|రైతు|డ్రైవర్|;
+🏺|మట్టి కుండలు చేసేది ఎవరు?|కుమ్మరి|దర్జీ|వడ్రంగి|డాక్టర్|;
+🪑|చెక్కతో కుర్చీలు, తలుపులు చేసేది ఎవరు?|వడ్రంగి|కుమ్మరి|దర్జీ|పోస్ట్‌మ్యాన్|;
+🚒|అగ్ని ప్రమాదం జరిగితే ఎవరు వచ్చి మంటలు ఆర్పుతారు?|అగ్నిమాపక సిబ్బంది|పోస్ట్‌మ్యాన్|టీచర్|దర్జీ|;
+🚑|అంబులెన్స్ కోసం ఏ నంబర్‌కు ఫోన్ చేయాలి?|108|100|999|123|ఆపదలో అంబులెన్స్ కోసం 108 కు ఫోన్ చేయాలి.;
+🌍|మనం నివసించే గ్రహం పేరు ఏమిటి?|భూమి|చంద్రుడు|సూర్యుడు|అంగారకుడు|;
+🌙|రాత్రి ఆకాశంలో పెద్దగా మెరిసేది ఏది?|చంద్రుడు|సూర్యుడు|ఇంద్రధనుస్సు|మేఘం|;
+🐸|నీటిలోనూ, నేల మీదా బతకగలిగేది ఏది?|కప్ప|చేప|పిల్లి|కోడి|;
+🐍|పాము ఎలా కదులుతుంది?|పాకుతుంది|ఎగురుతుంది|దూకుతుంది|నాలుగు కాళ్ళతో నడుస్తుంది|;
+🍯|తేనెటీగలు నివసించే ఇల్లు ఏది?|తేనెపట్టు|గూడు|పుట్ట|గుహ|;
+🐜|చీమలు నివసించే ఇల్లు ఏది?|పుట్ట|గూడు|తేనెపట్టు|కొట్టం|;
+🐄|ఆవులు, గేదెలు ఉండే ఇల్లు ఏది?|కొట్టం (పాక)|గూడు|పుట్ట|గుహ|`);
+const PAIRS=P(`🔒|తాళం|🔑|తాళంచెవి;🧦|సాక్సులు|👟|బూట్లు;🍽️|పళ్ళెం|🥄|చెంచా;🌧️|వర్షం|☂️|గొడుగు;🐝|తేనెటీగ|🍯|తేనె;🐄|ఆవు|🥛|పాలు;🐔|కోడి|🥚|గుడ్డు;🐟|చేప|🌊|నీరు;🐦|పక్షి|🌳|చెట్టు;🔨|సుత్తి|🔩|మేకు;🧵|దారం|🪡|సూది;🚗|కారు|⛽|పెట్రోల్;🎂|కేక్|🕯️|కొవ్వొత్తి;👓|కళ్ళద్దాలు|👁️|కళ్ళు;🪥|బ్రష్|🦷|పళ్ళు;✉️|ఉత్తరం|📮|పోస్ట్ బాక్స్;🐒|కోతి|🍌|అరటిపండు;🐇|కుందేలు|🥕|క్యారెట్;📝|పుస్తకం|✏️|పెన్సిల్;🛏️|మంచం|🛌|దుప్పటి`);
+const CAUSE=P(`
+🌱|విత్తనం నాటి రోజూ నీళ్ళు పోస్తే ఏమవుతుంది?|మొక్క పెరుగుతుంది|రాయి అవుతుంది|బంతి వస్తుంది|విత్తనం ఎగిరిపోతుంది|మొక్కకు నీరు, ఎండ, గాలి కావాలి.;
+🧊|ఐస్ ముక్కను ఎండలో పెడితే ఏమవుతుంది?|కరిగి నీరు అవుతుంది|ఇంకా పెద్దదవుతుంది|రాయి అవుతుంది|రంగు మారుతుంది|వేడికి మంచు కరుగుతుంది.;
+🎈|బెలూన్‌లో ఇంకా ఇంకా గాలి ఊదితే ఏమవుతుంది?|పగిలిపోతుంది|చిన్నదవుతుంది|బరువెక్కుతుంది|గాలిపటం అవుతుంది|;
+🥚|కోడి గుడ్డు నుండి ఏం బయటికి వస్తుంది?|కోడిపిల్ల|చేపపిల్ల|కుక్కపిల్ల|పిల్లిపిల్ల|;
+🐛|గొంగళిపురుగు పెద్దయ్యాక ఏమవుతుంది?|సీతాకోకచిలుక|పాము|చీమ|పిచ్చుక|;
+🐸|కప్ప గుడ్ల నుండి మొదట ఏం వస్తుంది?|తోకకప్ప (టాడ్‌పోల్)|పాము|చేప|పక్షి|తోకకప్ప పెరిగి కప్ప అవుతుంది.;
+🌅|ఉదయం లేవగానే మొదట ఏం చేస్తాం?|పళ్ళు తోముకుంటాం|రాత్రి భోజనం చేస్తాం|మళ్ళీ నిద్రపోతాం|బడి నుండి ఇంటికి వస్తాం|;
+👕|బట్టలు ఉతికిన తర్వాత ఏం చేస్తాం?|ఎండలో ఆరబెడతాం|మట్టిలో వేస్తాం|మళ్ళీ మురికి చేస్తాం|పారేస్తాం|;
+🌇|సాయంత్రం తర్వాత ఏం వస్తుంది?|రాత్రి|ఉదయం|మధ్యాహ్నం|తెల్లవారుజాము|;
+☀️|ఉదయం తర్వాత ఏం వస్తుంది?|మధ్యాహ్నం|రాత్రి|అర్ధరాత్రి|సాయంత్రం|;
+🍌|అరటిపండు తినే ముందు ఏం చేయాలి?|తొక్క తీయాలి|ఉడకబెట్టాలి|ఉప్పు వేయాలి|ఫ్రిజ్‌లో పెట్టాలి|;
+💡|చీకటి గదిలో బాగా చూడాలంటే ఏం చేయాలి?|లైటు వేయాలి|కళ్ళు మూసుకోవాలి|తలుపు మూయాలి|పాట పాడాలి|;
+🥶|చలికాలంలో మనం ఏం వేసుకుంటాం?|స్వెటర్|పలుచని చొక్కా మాత్రమే|ఏమీ వేసుకోం|ఈత దుస్తులు|;
+🍫|ఎక్కువ చాక్లెట్లు తిని పళ్ళు తోమకపోతే ఏమవుతుంది?|పళ్ళు పుచ్చిపోతాయి|పళ్ళు తెల్లగా మెరుస్తాయి|పొడవు పెరుగుతాం|ఏమీ కాదు|;
+🏃|బాగా పరుగెత్తిన తర్వాత ఏమవుతుంది?|అలసట, దాహం వేస్తుంది|చలి వేస్తుంది|నిద్ర పోతుంది|ఆకలి అసలే ఉండదు|;
+☁️|ఆకాశంలో నల్ల మేఘాలు కమ్ముకున్నాయి. తర్వాత ఏం రావచ్చు?|వర్షం|ఇంద్రధనుస్సు మాత్రమే|మంచు తుఫాను|ఎండ ఎక్కువ|;
+🍞|పిండి కలిపాక ఏం చేస్తే చపాతీ తయారవుతుంది?|ఒత్తి పెనం మీద కాల్చాలి|నీళ్ళలో ఉంచాలి|ఎండలో ఆరబెట్టాలి|ఫ్రిజ్‌లో పెట్టాలి|;
+🥛|పాలను తోడు పెడితే మరుసటి రోజుకు ఏమవుతుంది?|పెరుగు|నీళ్ళు|నూనె|టీ|;
+🌳|చెట్లు అన్నీ నరికేస్తే ఏమవుతుంది?|వర్షాలు తగ్గి, పక్షులకు ఇల్లు ఉండదు|ఎక్కువ పండ్లు వస్తాయి|గాలి బాగుంటుంది|ఏమీ కాదు|చెట్లను కాపాడాలి.;
+📘|రోజూ చదువుకుంటే ఏమవుతుంది?|బాగా నేర్చుకుంటాం|మర్చిపోతాం|అలసిపోతాం|ఏమీ రాదు|`);
+const TF=P(`
+🐟|చేపలు నీటిలో ఈదుతాయి.|T|;
+🐘|ఏనుగు చీమ కంటే చిన్నది.|F|ఏనుగు చీమ కంటే చాలా పెద్దది.;
+☀️|సూర్యుడు రాత్రి పూట ఆకాశంలో కనిపిస్తాడు.|F|సూర్యుడు పగలు కనిపిస్తాడు.;
+🐄|ఆవు మనకు పాలు ఇస్తుంది.|T|;
+🐦|పక్షులకు రెక్కలు ఉంటాయి.|T|;
+🐍|పాముకు నాలుగు కాళ్ళు ఉంటాయి.|F|పాముకు కాళ్ళు ఉండవు, అది పాకుతుంది.;
+🧊|మంచు వేడిగా ఉంటుంది.|F|మంచు చల్లగా ఉంటుంది.;
+🍋|నిమ్మకాయ పుల్లగా ఉంటుంది.|T|;
+🔥|మంటను తాకితే చేయి కాలుతుంది.|T|;
+🐕|కుక్క మ్యావ్ మ్యావ్ అని అరుస్తుంది.|F|కుక్క భౌ భౌ అంటుంది. పిల్లి మ్యావ్ అంటుంది.;
+🌳|చెట్లు ఒక చోటు నుండి ఇంకో చోటుకు నడుస్తాయి.|F|చెట్లు నడవలేవు.;
+📅|ఆదివారం తర్వాత సోమవారం వస్తుంది.|T|;
+🔢|3 కంటే 5 పెద్దది.|T|;
+🍎|ఆపిల్ ఒక కూరగాయ.|F|ఆపిల్ ఒక పండు.;
+🌊|సముద్రపు నీరు ఉప్పగా ఉంటుంది.|T|;
+🐓|కోడి మనకు పాలు ఇస్తుంది.|F|కోడి గుడ్లు పెడుతుంది.;
+🌙|చంద్రుడు రాత్రి పూట కనిపిస్తాడు.|T|;
+🚲|సైకిల్‌కు మూడు చక్రాలు ఉంటాయి.|F|సైకిల్‌కు రెండు చక్రాలు.;
+🐧|పెంగ్విన్ ఒక పక్షి, కానీ అది ఎగరలేదు.|T|పెంగ్విన్ ఎగరలేదు, కానీ బాగా ఈదుతుంది.;
+🦒|జిరాఫీ మెడ చాలా పొట్టిగా ఉంటుంది.|F|జిరాఫీ మెడ చాలా పొడవుగా ఉంటుంది.;
+🍬|చక్కెర తియ్యగా ఉంటుంది.|T|;
+🌧️|వర్షం పడితే నేల తడుస్తుంది.|T|;
+🐢|తాబేలు కుందేలు కంటే వేగంగా పరుగెత్తుతుంది.|F|కుందేలు తాబేలు కంటే వేగంగా వెళ్తుంది.;
+🪨|రాయి నీటిలో తేలుతుంది.|F|రాయి బరువుగా ఉంటుంది, నీటిలో మునుగుతుంది.`);
+const OPP=P(`పెద్ద|చిన్న|🐘|🐭;వేడి|చల్లని|🔥|🧊;పైన|కింద|⬆️|⬇️;పగలు|రాత్రి|☀️|🌙;తెలుపు|నలుపు|⬜|⬛;పొడవు|పొట్టి|🦒|🐧;తీపి|చేదు|🍬|💊;నవ్వు|ఏడుపు|😀|😢;లావు|సన్నం|🐷|🐍;తెరువు|మూయు|📖|📕;ముందు|వెనుక|⏩|⏪;తడి|పొడి|💧|🏜️;వేగం|నెమ్మది|🐇|🐢;దగ్గర|దూరం|🏠|🏔️;లోపల|బయట|🏠|🌳;ఎక్కువ|తక్కువ|🍎🍎🍎|🍎;నిలబడు|కూర్చో|🧍|🪑;గట్టి|మెత్తని|🪨|🧸`);
+const NAMES=[['రాము','m'],['సీత','f'],['రవి','m'],['గీత','f'],['కిరణ్','m'],['లక్ష్మి','f']];
+const g2=(g,m,f)=>g==='m'?m:f;
+const row=(e,n)=>Array(n).fill(`<span>${e}</span>`).join('');
+function Bank(list,head){let q=[];return()=>{if(!q.length)q=shuffle(list);const[e,t,a,...rest]=q.pop();const why=rest.pop()||'';
+  return{q:head,say:[[t]],vis:`<span class="qhead">${e}</span><p class="qtext">${t}</p>`,opts:shuffle([a,...rest.filter(Boolean)]).map(x=>({h:x,v:x,say:[[x]],c:'txt'})),ans:a,after:[[a]],why}}}
+let tfq=[],pq=[];
+Object.assign(GEN,{
+  real:Bank(REAL,'ఏం చేయాలి? ఆలోచించు'),
+  gk:Bank(GK,'జనరల్ నాలెడ్జ్'),
+  cause:Bank(CAUSE,'ఏమవుతుంది? ఆలోచించు'),
+  tf(){if(!tfq.length)tfq=shuffle(TF);const[e,t,a,why]=tfq.pop();
+    return{q:'నిజమా? అబద్ధమా?',say:[[`${t} నిజమా? అబద్ధమా?`]],vis:`<span class="qhead">${e}</span><p class="qtext">${t}</p>`,
+      opts:[{h:'✅ నిజం',v:'T',say:[['నిజం']]},{h:'❌ అబద్ధం',v:'F',say:[['అబద్ధం']]}],ans:a,after:[[a==='T'?'నిజం':'అబద్ధం']],why}},
+  pairs(){if(!pq.length)pq=shuffle(PAIRS);const r=pq.pop(),ds=shuffle(PAIRS.filter(x=>x!==r)).slice(0,3);
+    return{q:'దీనితో జత ఏది?',say:[[`${r[1]}. దీనితో జత ఏది?`]],vis:`<span class="qbig">${r[0]}</span><span class="qword">${r[1]}</span>`,
+      opts:shuffle([r,...ds]).map(x=>({h:`<span class="oe">${x[2]}</span><small>${x[3]}</small>`,v:x[3],say:[[x[3]]]})),ans:r[3],after:[[`${r[1]}, ${r[3]}`]]}},
+  opp(){const r=pick(OPP),k=rnd(2),w=r[k],ans=r[1-k];const ds=shuffle(OPP.filter(x=>x!==r).map(x=>x[rnd(2)])).slice(0,3);
+    return{q:`"${w}" కి వ్యతిరేక పదం ఏది?`,say:[[`${w}. దీనికి వ్యతిరేక పదం ఏది?`]],vis:`<span class="qbig" style="font-size:1.6em">${r[2+k]}</span><span class="qword">${w}</span>`,
+      opts:shuffle([ans,...ds]).map(x=>({h:x,v:x,say:[[x]]})),ans,after:[[`${w}, ${ans}`]]}},
+  problem(){const[n,g]=pick(NAMES),[n2]=pick(NAMES.filter(x=>x[0]!==n)),t=rnd(12);let q,ans,vis='',money=false,opts=null;
+    if(t===0){const a=1+rnd(6),b=1+rnd(4);ans=a+b;q=`${n} దగ్గర ${a} మామిడిపండ్లు ఉన్నాయి. అమ్మ ఇంకా ${b} ఇచ్చింది. ఇప్పుడు ${n} దగ్గర మొత్తం ఎన్ని ఉన్నాయి?`;vis=row('🥭',a)+'<span class="op">+</span>'+row('🥭',b)}
+    else if(t===1){const a=3+rnd(7),b=1+rnd(a-1);ans=a-b;q=`చెట్టు మీద ${a} పక్షులు ఉన్నాయి. ${b} పక్షులు ఎగిరిపోయాయి. చెట్టు మీద ఇంకా ఎన్ని పక్షులు ఉన్నాయి?`;vis=Array.from({length:a},(_,j)=>`<span class="${j>=a-b?'gone':''}">🐦</span>`).join('')}
+    else if(t===2){const a=4+rnd(6),b=1+rnd(a-1);ans=a-b;q=`${n} దగ్గర ${a} చాక్లెట్లు ఉన్నాయి. స్నేహితులకు ${b} ${g2(g,'ఇచ్చాడు','ఇచ్చింది')}. ${n} దగ్గర ఇంకా ఎన్ని మిగిలాయి?`;vis=row('🍫',a)}
+    else if(t===3){const k=1+rnd(5);ans=2*k;q=`పెరట్లో ${k} కోళ్ళు ఉన్నాయి. ఒక్కో కోడికి 2 కాళ్ళు. మొత్తం ఎన్ని కాళ్ళు?`;vis=row('🐔',k)}
+    else if(t===4){const k=1+rnd(3);ans=3*k;q=`${k} ఆటోలు ఉన్నాయి. ఒక్కో ఆటోకు 3 చక్రాలు. మొత్తం ఎన్ని చక్రాలు?`;vis=row('🛺',k)}
+    else if(t===5){const k=2+rnd(2),e=1+rnd(4),tot=k*e;ans=e;q=`${tot} లడ్డూలను ${k} మంది పిల్లలు సమానంగా పంచుకున్నారు. ఒక్కొక్కరికి ఎన్ని లడ్డూలు వస్తాయి?`;vis=row('🟠',tot)+'<span class="op">÷</span>'+row('🧒',k)}
+    else if(t===6){const m=5+rnd(6),p=1+rnd(m-1);ans=m-p;money=true;q=`ఒక పెన్సిల్ ధర ₹${p}. ${n} దగ్గర ₹${m} ఉన్నాయి. పెన్సిల్ కొన్నాక ఇంకా ఎంత మిగులుతుంది?`;vis='<span class="qhead">✏️ 💰</span>'}
+    else if(t===7){const a=1+rnd(5),b=1+rnd(5);ans=a+b;money=true;q=`రబ్బరు ధర ₹${a}, స్కేలు ధర ₹${b}. రెండూ కొంటే మొత్తం ఎంత డబ్బు కావాలి?`;vis='<span class="qhead">📏 ➕ 🧽</span>'}
+    else if(t===8){const d=rnd(7),tm=Math.random()<.5,o=(d+(tm?1:6))%7;q=`ఈ రోజు ${DAYS[d][0]}. ${tm?'రేపు':'నిన్న'} ఏ రోజు?`;ans=DAYS[o][0];vis='<span class="qhead">📅</span>';
+      opts=shuffle([...new Set([ans,DAYS[(d+(tm?6:1))%7][0],DAYS[d][0],DAYS[(d+(tm?2:5))%7][0]])]).map(x=>({h:x,v:x,say:[[x]]}))}
+    else if(t===9){const a=1+rnd(9),b=Math.random()<.25?a:1+rnd(9);q=`${n} దగ్గర ${a} గోళీలు, ${n2} దగ్గర ${b} గోళీలు ఉన్నాయి. ఎవరి దగ్గర ఎక్కువ ఉన్నాయి?`;
+      ans=a>b?n:b>a?n2:'ఇద్దరి దగ్గర సమానం';vis=`<div>${n}: ${row('🔵',a)}</div><div>${n2}: ${row('🔴',b)}</div>`;opts=[n,n2,'ఇద్దరి దగ్గర సమానం'].map(x=>({h:x,v:x,say:[[x]]}))}
+    else if(t===10){const a=1+rnd(3),b=1+rnd(3);ans=a+b+1;q=`వరుసలో ${n} ముందు ${a} మంది, వెనుక ${b} మంది నిలబడి ఉన్నారు. వరుసలో మొత్తం ఎంత మంది ఉన్నారు?`;vis=row('🧒',a)+'<span style="color:var(--focus)">⭐</span>'+row('🧒',b);}
+    else{const c=6+rnd(5),h=1+rnd(c-1);ans=c-h;q=`ఒక పెట్టెలో ${c} గుడ్లు పడతాయి. ఇప్పుడు ${h} గుడ్లు ఉన్నాయి. పెట్టె నిండాలంటే ఇంకా ఎన్ని గుడ్లు కావాలి?`;vis=row('🥚',h)+row('⚪',c-h)}
+    if(!opts)opts=numOpts(ans,0,Math.max(10,ans+3)).map(v=>({h:money?`₹${v}`:String(v),v,c:'lat',say:[sayN(v)]}));
+    const why=t===10?`${n} తో కలిపి లెక్కపెట్టాలి: ${a10(q)}`:'';
+    return{q:'ఆలోచించి జవాబు చెప్పు',say:[[q]],vis:`<p class="qtext">${q}</p><div style="width:100%;font-size:.7em">${vis}</div>`,opts,ans,after:[typeof ans==='number'?sayN(ans):[ans]],why}},
+  logic(){const t=rnd(7);
+    if(t<=1){const[i,j]=shuffle([...EXT.keys()]).slice(0,2),A=shuffle(EXT[i][0]).slice(0,3),B=pick(EXT[j][0]);
+      return{q:'వేరుగా ఉన్నది ఏది?',say:[['వీటిలో వేరుగా ఉన్నది ఏది?']],vis:'<span class="qbig">🤔</span>',opts:shuffle([...A,B]).map(x=>({h:`<span class="oe">${x[0]}</span><small>${x[1]}</small>`,v:x[1],say:[[x[1]]]})),ans:B[1],why:`${B[1]} ఒక ${EXT[j][1]}. మిగతా మూడూ ${EXT[i][1]} గుంపుకు చెందినవి.`}}
+    if(t===2){const fl=shuffle(BIRD.filter(b=>!['🐧','🐔'].includes(b[0]))).slice(0,3),no=Math.random()<.4?BIRD.find(b=>b[0]==='🐧'):pick(ANI);
+      return{q:'వీటిలో ఎగరలేనిది ఏది?',say:[['వీటిలో ఎగరలేనిది ఏది?']],vis:'<span class="qbig">🪽</span>',opts:shuffle([...fl,no]).map(x=>({h:`<span class="oe">${x[0]}</span><small>${x[1]}</small>`,v:x[1],say:[[x[1]]]})),ans:no[1],why:no[0]==='🐧'?'పెంగ్విన్ పక్షి అయినా ఎగరలేదు.':`${no[1]} కి రెక్కలు లేవు.`}}
+    if(t===3){const a=1+rnd(9),b=Math.random()<.25?a:1+rnd(9),e=pick(CNT);const ans=a>b?'L':b>a?'R':'E';
+      return{q:'ఏ వైపు ఎక్కువ ఉన్నాయి?',say:[['ఏ వైపు ఎక్కువ ఉన్నాయి?']],vis:`<div>${row(e,a)}</div><span class="op">|</span><div>${row(e,b)}</div>`,
+        opts:[{h:'◀ ఎడమ వైపు',v:'L',say:[['ఎడమ వైపు']]},{h:'రెండూ సమానం',v:'E',say:[['రెండూ సమానం']]},{h:'కుడి వైపు ▶',v:'R',say:[['కుడి వైపు']]}],ans,after:[[`ఎడమ ${TEN[a]}, కుడి ${TEN[b]}`]]}}
+    if(t===4){const[L,bq,sq,ic]=pick(ORDERS),ix=shuffle([...L.keys()]).slice(0,3),big=Math.random()<.5,a=L[big?Math.max(...ix):Math.min(...ix)],q=big?bq:sq;
+      return{q,say:[[q]],vis:`<span class="qbig">${ic}</span>`,opts:ix.map(j=>({h:`<span class="oe">${L[j][0]}</span><small>${L[j][1]}</small>`,v:L[j][1],say:[[L[j][1]]]})),ans:a[1],after:[[a[1]]]}}
+    if(t===5){const s=new Set();while(s.size<4)s.add(1+rnd(50));const a=[...s],big=Math.random()<.5,ans=big?Math.max(...a):Math.min(...a),q=big?'వీటిలో పెద్ద సంఖ్య ఏది?':'వీటిలో చిన్న సంఖ్య ఏది?';
+      return{q,say:[[q]],vis:'<span class="qbig">🔢</span>',opts:a.map(nOpt),ans,after:[sayN(ans)]}}
+    const n=2+rnd(60),aft=Math.random()<.5,ans=aft?n+1:n-1,q=aft?`${n} తర్వాత వచ్చే సంఖ్య ఏది?`:`${n} కి ముందు వచ్చే సంఖ్య ఏది?`;
+    return{q,say:[[q]],vis:`<span class="qword lat">${n}</span>`,opts:numOpts(ans,Math.max(0,ans-4),ans+4).map(nOpt),ans,after:[sayN(ans)]}}
+});
+function a10(q){const m=q.match(/(\d+) మంది, వెనుక (\d+)/);return m?`${m[1]} + 1 + ${m[2]} = ${+m[1]+1+ +m[2]}`:''}
+
+/* ---------- topics ---------- */
+const LET_T=[...VOW,...CON].map(([l,w])=>[l,[[l],...(w?[[w]]:[])]]);
+const NUM_T=[...Array.from({length:11},(_,n)=>[String(n),[[TEN[n]],[ENN[n],'en']]]),...Array.from({length:9},(_,n)=>[tDig(n+1),[[TEN[n+1]]]])];
+const SECT={learn:['నేర్చుకుందాం','చూసి, విని నేర్చుకో','var(--learn)'],do:['రాద్దాం, ఆడదాం','దిద్దడం, రంగులు, ఆటలు','var(--do)'],quiz:['ప్రశ్న – జవాబు','ఆలోచించి జవాబు ఎంచుకో','var(--quiz)'],think:['ఆలోచిద్దాం','నిజజీవితం, సమస్యలు, GK, తర్కం','var(--think)']};
+const TOPICS=[
+  ['tel','learn','అ','తెలుగు అక్షరాలు','Telugu Alphabets',()=>Flash(ITEMS.tel())],
+  ['eng','learn','🔤','ఆంగ్ల అక్షరాలు','English A–Z',()=>Flash(ITEMS.eng())],
+  ['hin','learn','क','హిందీ అక్షరాలు','Hindi Alphabets',()=>Flash(ITEMS.hin())],
+  ['num','learn','🔢','అంకెలు (3 భాషలు)','Numbers',()=>Flash(ITEMS.num())],
+  ['shapes','learn','🔷','ఆకారాలు','Shapes',()=>Flash(ITEMS.shapes())],
+  ['colors','learn','🎨','రంగులు','Colors',()=>Flash(ITEMS.colors())],
+  ['animals','learn','🐘','జంతువులు','Animals',()=>Flash(ITEMS.animals())],
+  ['birds','learn','🦜','పక్షులు','Birds',()=>Flash(ITEMS.birds())],
+  ['fruits','learn','🥭','పండ్లు','Fruits',()=>Flash(ITEMS.fruits())],
+  ['veg','learn','🍆','కూరగాయలు','Vegetables',()=>Flash(ITEMS.veg())],
+  ['body','learn','👂','శరీర భాగాలు','Body Parts',()=>Flash(ITEMS.body())],
+  ['days','learn','📅','వారంలోని రోజులు','Days of the Week',()=>Flash(ITEMS.days())],
+  ['months','learn','🗓️','నెలలు','Months of the Year',()=>Flash(ITEMS.months())],
+  ['seasons','learn','🌦️','ఋతువులు','Seasons',()=>Flash(ITEMS.seasons())],
+  ['habits','learn','🪥','మంచి అలవాట్లు','Good Habits',()=>Flash(ITEMS.habits())],
+  ['words','learn','🐱','సులభమైన ఆంగ్ల పదాలు','Simple English Words',()=>Flash(ITEMS.words())],
+  ['lines','do','〰️','గీతలు దిద్దడం','Line Tracing',()=>Tracing()],
+  ['tprac','do','✍️','తెలుగు అక్షరాల సాధన','Telugu Letter Practice',()=>Write(LET_T)],
+  ['ntrace','do','✏️','అంకెలు దిద్దడం','Number Tracing',()=>Write(NUM_T)],
+  ['dots','do','⭐','చుక్కలు కలపడం','Dot to Dot',()=>Dots()],
+  ['maze','do','🐭','దారి కనుక్కో','Maze',()=>Maze()],
+  ['color','do','🖍️','రంగులు వేయడం','Coloring Pages',()=>Coloring()],
+  ['counting','quiz','🍎','లెక్కించడం','Counting',()=>Quiz(GEN.counting)],
+  ['matching','quiz','🔗','జతపరచడం','Matching',()=>Quiz(GEN.matching)],
+  ['missL','quiz','🔡','తప్పిపోయిన అక్షరాలు','Missing Letters',()=>Quiz(GEN.missLetters)],
+  ['missN','quiz','🔟','తప్పిపోయిన అంకెలు','Missing Numbers',()=>Quiz(GEN.missNumbers)],
+  ['add','quiz','➕','కూడిక','Addition',()=>Quiz(GEN.add)],
+  ['sub','quiz','➖','తీసివేత','Subtraction',()=>Quiz(GEN.sub)],
+  ['time','quiz','🕒','సమయం చూడటం','Telling Time',()=>Quiz(GEN.time)],
+  ['sort','quiz','🧺','వర్గీకరణ','Sorting',()=>Quiz(GEN.sorting)],
+  ['pattern','quiz','🔴','నమూనాలు','Pattern Recognition',()=>Quiz(GEN.pattern)],
+  ['logic','quiz','🧠','తార్కిక ఆలోచన','Logical Thinking',()=>Quiz(GEN.logic)],
+  ['puzzle','quiz','🤔','పొడుపు కథలు','Puzzles',()=>Quiz(GEN.puzzle)],
+  ['real','think','🚦','నిజజీవిత సన్నివేశాలు','What should you do?',()=>Quiz(GEN.real)],
+  ['prob','think','🧮','చిన్న సమస్యలు','Word Problems',()=>Quiz(GEN.problem)],
+  ['gk','think','🌍','జనరల్ నాలెడ్జ్','Simple GK',()=>Quiz(GEN.gk)],
+  ['pairs','think','🔑','జతలు','What goes together?',()=>Quiz(GEN.pairs)],
+  ['cause','think','🌱','ఏమవుతుంది?','Cause & Effect, Sequence',()=>Quiz(GEN.cause)],
+  ['tf','think','✅','నిజమా? అబద్ధమా?','True or False',()=>Quiz(GEN.tf)],
+  ['opp','think','↔️','వ్యతిరేక పదాలు','Opposites',()=>Quiz(GEN.opp)]
+];
+
+/* ---------- screens ---------- */
+let lastTile='tel';
+function destroyView(){if(view&&view.destroy)view.destroy();if(hasTTS)speechSynthesis.cancel()}
+function showHome(){destroyView();view={id:null};$('#homeBtn').style.display='none';
+  $('#title').innerHTML=`చిన్నారి బడి<small>నర్సరీ, LKG, UKG – ${TOPICS.length} అంశాలు</small>`;
+  const st=$('#stage');
+  st.innerHTML=`<div class="home"><div class="hero"><div class="glyphs"><span>అ</span><span>A</span><span>क</span><span>1</span></div><p>తెలుగు, ఇంగ్లీష్, హిందీ – చూసి, విని, ఆడుతూ నేర్చుకుందాం.<br>రిమోట్ బాణాలతో అంశం ఎంచుకుని OK నొక్కండి.</p></div>`+
+    Object.entries(SECT).map(([k,[te,sub,c]])=>`<section class="sec" style="--c:${c}"><h2><i></i>${te} <em>${sub}</em></h2><div class="grid">`+
+    TOPICS.filter(t=>t[1]===k).map(([id,,ic,te2,en])=>`<button class="f tile" data-id="${id}" data-say='${JSON.stringify([[te2]])}'><span class="ic">${ic}</span><span class="tn">${te2}</span><span class="en">${en}</span></button>`).join('')+`</div></section>`).join('')+`</div>`;
+  st.querySelectorAll('.tile').forEach(b=>b.onclick=()=>openTopic(b.dataset.id));
+  const f=st.querySelector(`[data-id="${lastTile}"]`)||st.querySelector('.tile');f.focus({preventScroll:true});f.scrollIntoView({block:'center'});
+  hint('<kbd>◀ ▲ ▼ ▶</kbd> ఎంచుకో <kbd>OK</kbd> తెరువు <kbd>🔊</kbd> పై బటన్‌తో వాయిస్ ఆన్/ఆఫ్');
+}
+function openTopic(id,push=true){const t=TOPICS.find(x=>x[0]===id);if(!t)return;destroyView();lastTile=id;
+  if(push)history.pushState({t:id},'');
+  $('#homeBtn').style.display='';$('#title').innerHTML=`${t[3]}<small>${t[4]}</small>`;
+  const st=$('#stage');st.innerHTML='';document.activeElement&&document.activeElement.blur();
+  const v=t[5]()(st)||{};v.id=id;view=v;window.scrollTo(0,0);
+  if(!st.querySelector('.f:focus'))document.body.focus();
+}
+function goHome(){if(history.state&&history.state.t)history.back();else showHome()}
+window.addEventListener('popstate',()=>{if(view&&view.id)showHome()});
+history.replaceState(null,'');
+showHome();
+</script>
+</body>
+</html>
